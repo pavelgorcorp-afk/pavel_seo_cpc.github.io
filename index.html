@@ -1,206 +1,332 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DMC: POC Banner Calc 2025</title>
-    
-    <!-- Yandex.Metrika counter -->
-    <script type="text/javascript">
-        (function(m,e,t,r,i,k,a){
-            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-            m[i].l=1*new Date();
-            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-        })(window, document,'script','mc.yandex.ru', 'ym');
-        ym(105999900, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
-    </script>
-    <noscript><div><img src="mc.yandex.ru" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-    <!-- /Yandex.Metrika counter -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DMC: POC Banner Calc 2025</title>
 
-    <style>
-        :root {
-            --primary: #52a055;
-            --bg: #1c1c1e;
-            --card-bg: #2c2c2e;
-            --text: #ffffff;
-            --secondary: #555557;
-            --weapon-color: #3d85c6;
-        }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; justify-content: center; }
-        .card { background: var(--card-bg); padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 100%; max-width: 400px; }
-        .tabs { display: flex; gap: 5px; margin-bottom: 20px; background: #3a3a3c; padding: 5px; border-radius: 10px; }
-        .tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; border-radius: 8px; font-size: 0.9rem; transition: 0.3s; color: #aaa; }
-        .tab.active { background: var(--primary); color: white; }
-        .tab.active.weapon-tab { background: var(--weapon-color); }
-        h3 { margin-top: 0; color: var(--primary); text-align: center; font-size: 1.1rem; }
-        .weapon-title { color: var(--weapon-color) !important; }
-        label { display: block; margin: 10px 0 5px; font-size: 0.85rem; color: #aaa; }
-        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 10px; border: 1px solid #444; background: #3a3a3c; color: white; box-sizing: border-box; font-size: 1rem; outline: none; }
-        input:focus { border-color: var(--primary); }
-        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
-        button { padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; width: 100%; transition: opacity 0.2s; }
-        .btn-calc { background: var(--primary); color: white; flex: 2; }
-        .btn-reset { background: var(--secondary); color: white; flex: 1; }
-        button:active { opacity: 0.8; }
-        .res { margin-top: 20px; padding: 15px; background: #3a3a3c; border-radius: 10px; font-size: 0.9rem; line-height: 1.6; }
-        .mode-title { font-weight: bold; display: block; margin-top: 10px; border-bottom: 1px solid #555; padding-bottom: 3px; }
-        .footer { margin-top: 25px; padding-top: 15px; border-top: 1px dashed #555; text-align: center; font-size: 0.8rem; color: #888; }
-        .donate-id { display: inline-block; margin-top: 5px; color: #ddd; background: #444; padding: 4px 8px; border-radius: 5px; font-family: monospace; font-size: 0.9rem; }
-    </style>
+  <!-- Yandex.Metrika counter -->
+  <script type="text/javascript">
+    (function (m, e, t, r, i, k, a) {
+      m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments); };
+      m[i].l = 1 * new Date();
+      for (var j = 0; j < document.scripts.length; j++) {
+        if (document.scripts[j].src === r) { return; }
+      }
+      k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a);
+    })(window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+    ym(105999900, "init", {
+      ssr: true,
+      webvisor: true,
+      clickmap: true,
+      ecommerce: "dataLayer",
+      accurateTrackBounce: true,
+      trackLinks: true
+    });
+  </script>
+  <noscript>
+    <div><img src="https://mc.yandex.ru/watch/105999900" style="position:absolute; left:-9999px;" alt="" /></div>
+  </noscript>
+  <!-- /Yandex.Metrika counter -->
+
+  <style>
+    :root {
+      --primary: #52a055;
+      --bg: #1c1c1e;
+      --card-bg: #2c2c2e;
+      --text: #ffffff;
+      --secondary: #555557;
+      --weapon-color: #3d85c6;
+    }
+    body {
+      font-family: -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 15px;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+    }
+    .card {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      width: 100%;
+      max-width: 400px;
+    }
+    .tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 20px;
+      background: #3a3a3c;
+      padding: 5px;
+      border-radius: 10px;
+    }
+    .tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: 0.3s;
+      color: #aaa;
+      user-select: none;
+    }
+    .tab.active { background: var(--primary); color: white; }
+    .tab.active.weapon-tab { background: var(--weapon-color); }
+    h3 {
+      margin-top: 0;
+      color: var(--primary);
+      text-align: center;
+      font-size: 1.1rem;
+    }
+    .weapon-title { color: var(--weapon-color) !important; }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-size: 0.85rem;
+      color: #aaa;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      border: 1px solid #444;
+      background: #3a3a3c;
+      color: white;
+      box-sizing: border-box;
+      font-size: 1rem;
+      outline: none;
+    }
+    input:focus { border-color: var(--primary); }
+    .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+    button {
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1rem;
+      width: 100%;
+      transition: opacity 0.2s;
+    }
+    .btn-calc { background: var(--primary); color: white; flex: 2; }
+    .btn-reset { background: var(--secondary); color: white; flex: 1; }
+    button:active { opacity: 0.8; }
+    .res {
+      margin-top: 20px;
+      padding: 15px;
+      background: #3a3a3c;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .mode-title {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+      border-bottom: 1px solid #555;
+      padding-bottom: 3px;
+    }
+    .footer {
+      margin-top: 25px;
+      padding-top: 15px;
+      border-top: 1px dashed #555;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #888;
+    }
+    .donate-id {
+      display: inline-block;
+      margin-top: 5px;
+      color: #ddd;
+      background: #444;
+      padding: 4px 8px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
-<body>
 
-<div class="card">
+<body>
+  <div class="card">
     <div class="tabs">
-        <div id="tabChar" class="tab active" onclick="switchTab('char')">Персонаж</div>
-        <div id="tabWeapon" class="tab" onclick="switchTab('weapon')">Оружие</div>
+      <div id="tabChar" class="tab active" onclick="switchTab('char')">Персонаж</div>
+      <div id="tabWeapon" class="tab" onclick="switchTab('weapon')">Оружие</div>
     </div>
 
     <h3 id="mainTitle">Калькулятор Персонажа</h3>
-    
+
     <!-- ПЕРСОНАЖ -->
     <div id="charFields">
-        <label>Нужно уровней (копий):</label>
-        <input type="number" id="levels" value="1" min="1">
-        
-        <label>Текущий шаг цикла (1-5):</label>
-        <select id="currentStep">
-            <option value="0">1 (За 10)</option>
-            <option value="1">2 (За 5)</option>
-            <option value="2">3 (За 10)</option>
-            <option value="3">4 (За 10)</option>
-            <option value="4">5 (БЕСПЛАТНЫЙ)</option>
-        </select>
+      <label>Нужно уровней (копий):</label>
+      <input type="number" id="levels" value="1" min="1" />
 
-        <label>Счетчик гаранта (сейчас):</label>
-        <input type="number" id="charPity" value="90" min="20" max="90">
-        
-        <label>Есть 100% гарант на персонажа?</label>
-        <select id="charGuaranteed">
-            <option value="no">Нет (50/50)</option>
-            <option value="yes">Да (100%)</option>
-        </select>
+      <label>Текущий шаг цикла (1-5):</label>
+      <select id="currentStep">
+        <option value="0">1 (За 10)</option>
+        <option value="1">2 (За 5)</option>
+        <option value="2">3 (За 10)</option>
+        <option value="3">4 (За 10)</option>
+        <option value="4">5 (БЕСПЛАТНЫЙ)</option>
+      </select>
+
+      <label>Счетчик гаранта (сейчас):</label>
+      <input type="number" id="charPity" value="90" min="20" max="90" />
+
+      <label>Есть 100% гарант на персонажа?</label>
+      <select id="charGuaranteed">
+        <option value="no">Нет (50/50)</option>
+        <option value="yes">Да (100%)</option>
+      </select>
     </div>
 
     <!-- ОРУЖИЕ -->
-    <div id="weaponFields" style="display: none;">
-        <label>Нужно копий оружия:</label>
-        <input type="number" id="wepCount" value="1" min="1">
-        <label>Откручено в этом цикле (0-69):</label>
-        <input type="number" id="wepPity" value="0" min="0" max="69">
-        <label>Есть 100% гарант на оружие?</label>
-        <select id="wepGuaranteed">
-            <option value="no">Нет (50/50)</option>
-            <option value="yes">Да (100%)</option>
-        </select>
+    <div id="weaponFields" style="display:none;">
+      <label>Нужно копий оружия:</label>
+      <input type="number" id="wepCount" value="1" min="1" />
+
+      <label>Откручено в этом цикле (0-69):</label>
+      <input type="number" id="wepPity" value="0" min="0" max="69" />
+
+      <label>Есть 100% гарант на оружие?</label>
+      <select id="wepGuaranteed">
+        <option value="no">Нет (50/50)</option>
+        <option value="yes">Да (100%)</option>
+      </select>
     </div>
 
     <div class="btn-group">
-        <button id="calcBtn" class="btn-calc" onclick="calculate()">Рассчитать</button>
-        <button class="btn-reset" onclick="resetPage()">Сброс</button>
+      <button id="calcBtn" class="btn-calc" onclick="calculate()">Рассчитать</button>
+      <button class="btn-reset" onclick="resetPage()">Сброс</button>
     </div>
 
     <div id="result" class="res">Результаты появятся здесь...</div>
 
     <div class="footer">
-        Благодарность автору (In-game ID):<br>
-        <div class="donate-id">115290070957</div>
+      Благодарность автору (In-game ID):<br />
+      <div class="donate-id">115290070957</div>
     </div>
-</div>
+  </div>
 
-<script>
-    let currentMode = 'char';
+  <script>
+    let currentMode = "char";
 
     function switchTab(mode) {
-        currentMode = mode;
-        const isChar = mode === 'char';
-        document.getElementById('tabChar').classList.toggle('active', isChar);
-        document.getElementById('tabWeapon').classList.toggle('active', !isChar);
-        document.getElementById('tabWeapon').classList.toggle('weapon-tab', !isChar);
-        document.getElementById('charFields').style.display = isChar ? 'block' : 'none';
-        document.getElementById('weaponFields').style.display = isChar ? 'none' : 'block';
-        const title = document.getElementById('mainTitle');
-        title.innerText = isChar ? 'Калькулятор Персонажа' : 'Калькулятор Оружия';
-        title.className = isChar ? '' : 'weapon-title';
-        document.getElementById('calcBtn').style.background = isChar ? 'var(--primary)' : 'var(--weapon-color)';
+      currentMode = mode;
+      const isChar = mode === "char";
+
+      document.getElementById("tabChar").classList.toggle("active", isChar);
+      document.getElementById("tabWeapon").classList.toggle("active", !isChar);
+      document.getElementById("tabWeapon").classList.toggle("weapon-tab", !isChar);
+
+      document.getElementById("charFields").style.display = isChar ? "block" : "none";
+      document.getElementById("weaponFields").style.display = isChar ? "none" : "block";
+
+      const title = document.getElementById("mainTitle");
+      title.innerText = isChar ? "Калькулятор Персонажа" : "Калькулятор Оружия";
+      title.className = isChar ? "" : "weapon-title";
+
+      document.getElementById("calcBtn").style.background = isChar ? "var(--primary)" : "var(--weapon-color)";
     }
 
     function calculate() {
-        const rate = 180;
-        // ИСПРАВЛЕНО: Добавлен массив стоимостей шагов
-        const stepCosts =;
-        let out = "";
+      const rate = 180;
 
-        if (currentMode === 'char') {
-            const count = parseInt(document.getElementById('levels').value) || 0;
-            const startStep = parseInt(document.getElementById('currentStep').value);
-            const currentPity = parseInt(document.getElementById('charPity').value) || 90;
-            const startGuar = document.getElementById('charGuaranteed').value === 'yes';
-            const cycle = 70; // До леги (90 - 20)
+      // ✅ Стоимость шагов 1..5: 10, 5, 10, 10, 0
+      const stepCosts = [10, 5, 10, 10, 0];
 
-            const scenarios = [
-                {n: "Супер удача (всегда на 70)", type: "lucky"},
-                {n: "Обычная (среднее 50/50)", type: "mixed"},
-                {n: "Худший случай (по 140)", type: "worst"}
-            ];
+      let out = "";
 
-            scenarios.forEach(scen => {
-                let totalCards = 0;
-                let stepIdx = startStep;
-                let isNextGuar = startGuar;
-                let pityCursor = currentPity;
+      if (currentMode === "char") {
+        const count = parseInt(document.getElementById("levels").value) || 0;
+        const startStep = parseInt(document.getElementById("currentStep").value);
+        const currentPity = parseInt(document.getElementById("charPity").value) || 90;
+        const startGuar = document.getElementById("charGuaranteed").value === "yes";
+        const cycle = 70; // (90 - 20)
 
-                for (let i = 0; i < count; i++) {
-                    let legiesToFind = 1;
-                    if (scen.type === "worst" || (scen.type === "mixed" && !isNextGuar)) {
-                        legiesToFind = 2;
-                    }
+        const scenarios = [
+          { n: "Супер удача (всегда на 70)", type: "lucky" },
+          { n: "Обычная (среднее 50/50)", type: "mixed" },
+          { n: "Худший случай (по 140)", type: "worst" }
+        ];
 
-                    for (let l = 0; l < legiesToFind; l++) {
-                        // Сколько круток до леги в этом конкретном цикле
-                        let pullsNeeded = (pityCursor > 20) ? (pityCursor - 20) : cycle;
-                        
-                        for (let p = 0; p < pullsNeeded; p++) {
-                            totalCards += stepCosts[stepIdx % 5];
-                            stepIdx++;
-                        }
-                        
-                        pityCursor = 90; // Счетчик сбросился до 90 после леги
-                        isNextGuar = false; // Гарант сгорел
-                    }
-                }
-                out += `<span class="mode-title" style="color:var(--primary)">● ${scen.n}</span>`;
-                out += `Карт: <b>${totalCards}</b> | Кристаллов: <b>${(totalCards * rate).toLocaleString()}</b><br>`;
-            });
+        scenarios.forEach((scen) => {
+          let totalCards = 0;
+          let stepIdx = startStep;
+          let isNextGuar = startGuar;
+          let pityCursor = currentPity;
 
-        } else {
-            const count = parseInt(document.getElementById('wepCount').value) || 0;
-            const currentPity = parseInt(document.getElementById('wepPity').value) || 0;
-            const startG = document.getElementById('wepGuaranteed').value === 'yes';
-            const cycle = 70;
-
-            let superC = (count * cycle) - currentPity;
-            let mixedC = 0;
-            let nextG = startG;
-            for(let i = 0; i < count; i++) {
-                let toNext = (i === 0) ? (cycle - currentPity) : cycle;
-                if (nextG) { mixedC += toNext; nextG = false; }
-                else { mixedC += toNext + cycle; nextG = false; }
+          for (let i = 0; i < count; i++) {
+            let legiesToFind = 1;
+            if (scen.type === "worst" || (scen.type === "mixed" && !isNextGuar)) {
+              legiesToFind = 2;
             }
-            let worstC = startG ? ((count * 140) - 70 - currentPity) : ((count * 140) - currentPity);
 
-            out += `<span class="mode-title" style="color:var(--weapon-color)">● Супер удача (70 на копию)</span>`;
-            out += `Карт: <b>${superC}</b> | Кристаллов: <b>${(superC * rate).toLocaleString()}</b><br>`;
-            out += `<span class="mode-title" style="color:var(--weapon-color)">● Обычная (шанс 50/50)</span>`;
-            out += `Карт: <b>${mixedC}</b> | Кристаллов: <b>${(mixedC * rate).toLocaleString()}</b><br>`;
-            out += `<span class="mode-title" style="color:var(--weapon-color)">● Худший случай (по 140)</span>`;
-            out += `Карт: <b>${worstC}</b> | Кристаллов: <b>${(worstC * rate).toLocaleString()}</b><br>`;
+            for (let l = 0; l < legiesToFind; l++) {
+              let pullsNeeded = pityCursor > 20 ? (pityCursor - 20) : cycle;
+
+              for (let p = 0; p < pullsNeeded; p++) {
+                totalCards += stepCosts[stepIdx % 5];
+                stepIdx++;
+              }
+
+              pityCursor = 90;     // сброс после леги
+              isNextGuar = false;  // гарант "сгорел"
+            }
+          }
+
+          out += `<span class="mode-title" style="color:var(--primary)">● ${scen.n}</span>`;
+          out += `Карт: <b>${totalCards}</b> | Кристаллов: <b>${(totalCards * rate).toLocaleString()}</b><br>`;
+        });
+
+      } else {
+        const count = parseInt(document.getElementById("wepCount").value) || 0;
+        const currentPity = parseInt(document.getElementById("wepPity").value) || 0;
+        const startG = document.getElementById("wepGuaranteed").value === "yes";
+        const cycle = 70;
+
+        let superC = (count * cycle) - currentPity;
+
+        let mixedC = 0;
+        let nextG = startG;
+        for (let i = 0; i < count; i++) {
+          let toNext = (i === 0) ? (cycle - currentPity) : cycle;
+
+          if (nextG) {
+            mixedC += toNext;
+            nextG = false;
+          } else {
+            mixedC += toNext + cycle;
+            nextG = false;
+          }
         }
-        document.getElementById('result').innerHTML = out;
+
+        let worstC = startG
+          ? ((count * 140) - 70 - currentPity)
+          : ((count * 140) - currentPity);
+
+        out += `<span class="mode-title" style="color:var(--weapon-color)">● Супер удача (70 на копию)</span>`;
+        out += `Карт: <b>${superC}</b> | Кристаллов: <b>${(superC * rate).toLocaleString()}</b><br>`;
+
+        out += `<span class="mode-title" style="color:var(--weapon-color)">● Обычная (шанс 50/50)</span>`;
+        out += `Карт: <b>${mixedC}</b> | Кристаллов: <b>${(mixedC * rate).toLocaleString()}</b><br>`;
+
+        out += `<span class="mode-title" style="color:var(--weapon-color)">● Худший случай (по 140)</span>`;
+        out += `Карт: <b>${worstC}</b> | Кристаллов: <b>${(worstC * rate).toLocaleString()}</b><br>`;
+      }
+
+      document.getElementById("result").innerHTML = out;
     }
 
-    function resetPage() { window.location.reload(); }
-</script>
+    function resetPage() {
+      window.location.reload();
+    }
+  </script>
 </body>
 </html>
