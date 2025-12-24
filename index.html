@@ -128,7 +128,8 @@
 
     function calculate() {
         const rate = 180;
-        const stepCosts =;
+        // ИСПРАВЛЕНО: Добавлен массив стоимостей шагов
+        const stepCosts = [10, 5, 10, 10, 0];
         let out = "";
 
         if (currentMode === 'char') {
@@ -139,9 +140,9 @@
             const cycle = 70; // До леги (90 - 20)
 
             const scenarios = [
-                {id: 'lucky', n: "Супер удача (всегда на 70)", fail: false},
-                {id: 'mixed', n: "Обычная (среднее 50/50)", fail: "maybe"},
-                {id: 'worst', n: "Худший случай (по 140)", fail: true}
+                {n: "Супер удача (всегда на 70)", fail: false},
+                {n: "Обычная (среднее 50/50)", fail: "maybe"},
+                {n: "Худший случай (по 140)", fail: true}
             ];
 
             scenarios.forEach(scen => {
@@ -150,7 +151,6 @@
                 let isNextGuar = startGuar;
 
                 for (let i = 0; i < count; i++) {
-                    // Учитываем проигрыш 50/50: нужно выбить 2 леги, чтобы получить нужную
                     let legiesToFind = 1;
                     if (scen.fail === true || (scen.fail === "maybe" && !isNextGuar)) {
                         legiesToFind = 2;
@@ -158,6 +158,7 @@
 
                     for (let l = 0; l < legiesToFind; l++) {
                         // Сколько круток до леги в этом конкретном цикле
+                        // Первая копия считает от текущего Pity, остальные по 70
                         let pulls = (i === 0 && l === 0) ? (currentPity - 20) : cycle;
 
                         for (let p = 0; p < pulls; p++) {
