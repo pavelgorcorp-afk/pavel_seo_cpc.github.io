@@ -32,13 +32,16 @@
 
   <style>
     :root {
-      --primary: #52a055;
+      /* ✅ Цвета по твоему запросу */
+      --char-color: #3d85c6;   /* синий = Персонаж */
+      --weapon-color: #c0392b; /* красный = Оружие */
+
       --bg: #1c1c1e;
       --card-bg: #2c2c2e;
       --text: #ffffff;
       --secondary: #555557;
-      --weapon-color: #3d85c6;
     }
+
     body {
       font-family: -apple-system, sans-serif;
       background: var(--bg);
@@ -75,15 +78,20 @@
       color: #aaa;
       user-select: none;
     }
-    .tab.active { background: var(--primary); color: white; }
+
+    /* ✅ Активная вкладка по умолчанию = персонаж (синий) */
+    .tab.active { background: var(--char-color); color: white; }
+    /* ✅ Активная вкладка оружия (красный) */
     .tab.active.weapon-tab { background: var(--weapon-color); }
+
     h3 {
       margin-top: 0;
-      color: var(--primary);
+      color: var(--char-color);
       text-align: center;
       font-size: 1.1rem;
     }
     .weapon-title { color: var(--weapon-color) !important; }
+
     label {
       display: block;
       margin: 10px 0 5px;
@@ -102,7 +110,8 @@
       font-size: 1rem;
       outline: none;
     }
-    input:focus { border-color: var(--primary); }
+    input:focus { border-color: var(--char-color); }
+
     .btn-group { display: flex; gap: 10px; margin-top: 10px; }
     button {
       padding: 15px;
@@ -114,9 +123,10 @@
       width: 100%;
       transition: opacity 0.2s;
     }
-    .btn-calc { background: var(--primary); color: white; flex: 2; }
+    .btn-calc { background: var(--char-color); color: white; flex: 2; }
     .btn-reset { background: var(--secondary); color: white; flex: 1; }
     button:active { opacity: 0.8; }
+
     .res {
       margin-top: 20px;
       padding: 15px;
@@ -191,7 +201,6 @@
       <label>Нужно копий оружия:</label>
       <input type="number" id="wepCount" value="1" min="1" />
 
-      <!-- ✅ ИСПРАВЛЕНО: поле теперь как у персонажа (счетчик 20-90) -->
       <label>Счетчик гаранта (сейчас):</label>
       <input type="number" id="wepPity" value="90" min="20" max="90" />
 
@@ -233,10 +242,10 @@
       title.innerText = isChar ? "Калькулятор Персонажа" : "Калькулятор Оружия";
       title.className = isChar ? "" : "weapon-title";
 
-      document.getElementById("calcBtn").style.background = isChar ? "var(--primary)" : "var(--weapon-color)";
+      document.getElementById("calcBtn").style.background = isChar ? "var(--char-color)" : "var(--weapon-color)";
     }
 
-    // ✅ Персонаж: логика по промту (стоимость шагов 10/5/10/10/0)
+    // Персонаж
     function calculateCharacter(count, startStep, currentPity, startGuaranteed) {
       const stepCosts = [10, 5, 10, 10, 0];
       const cyclePulls = 70;
@@ -286,7 +295,7 @@
       };
     }
 
-    // ✅ Оружие: логика как у персонажа по pity, но БЕЗ stepCosts (1 pull = 1 card)
+    // Оружие (1 pull = 1 card)
     function calculateWeapon(count, currentPity, startGuaranteed) {
       const cyclePulls = 70;
       const crystalRate = 180;
@@ -334,13 +343,13 @@
 
         const res = calculateCharacter(count, startStep, currentPity, startGuar);
 
-        out += `<span class="mode-title" style="color:var(--primary)">● Супер удача (всегда на 70)</span>`;
+        out += `<span class="mode-title" style="color:var(--char-color)">● Супер удача (всегда на 70)</span>`;
         out += `Карт: <b>${res.lucky.cards}</b> | Кристаллов: <b>${res.lucky.crystals.toLocaleString()}</b><br>`;
 
-        out += `<span class="mode-title" style="color:var(--primary)">● Обычная (среднее 50/50)</span>`;
+        out += `<span class="mode-title" style="color:var(--char-color)">● Обычная (среднее 50/50)</span>`;
         out += `Карт: <b>${res.mixed.cards}</b> | Кристаллов: <b>${res.mixed.crystals.toLocaleString()}</b><br>`;
 
-        out += `<span class="mode-title" style="color:var(--primary)">● Худший случай (по 140)</span>`;
+        out += `<span class="mode-title" style="color:var(--char-color)">● Худший случай (по 140)</span>`;
         out += `Карт: <b>${res.worst.cards}</b> | Кристаллов: <b>${res.worst.crystals.toLocaleString()}</b><br>`;
 
       } else {
@@ -363,9 +372,27 @@
       document.getElementById("result").innerHTML = out;
     }
 
+    // ✅ СБРОС: очищает значения и результат, НО ОСТАВЛЯЕТ текущую вкладку
     function resetPage() {
-      window.location.reload();
+      if (currentMode === "char") {
+        document.getElementById("levels").value = 1;
+        document.getElementById("currentStep").value = 0;
+        document.getElementById("charPity").value = 90;
+        document.getElementById("charGuaranteed").value = "no";
+      } else {
+        document.getElementById("wepCount").value = 1;
+        document.getElementById("wepPity").value = 90;
+        document.getElementById("wepGuaranteed").value = "no";
+      }
+
+      document.getElementById("result").innerHTML = "Результаты появятся здесь...";
+
+      // обновим заголовок/цвет кнопки, но вкладку НЕ меняем
+      switchTab(currentMode);
     }
+
+    // на всякий случай фиксируем корректные цвета при первом открытии
+    switchTab(currentMode);
   </script>
 </body>
 </html>
