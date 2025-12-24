@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DMC: POC Calc Pro 2025</title>
+    <title>DMC: POC Calc Pro</title>
     <style>
         :root {
             --primary: #52a055;
@@ -46,19 +46,21 @@
         <input type="number" id="levels" value="1" min="1">
         <label>Текущий шаг в цикле (0-4):</label>
         <select id="currentStep">
-            <option value="0">0 (Начало)</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4 (След. 0)</option>
+            <option value="0">0 (Начало)</option>
+            <option value="1">1</option><option value="2">2</option>
+            <option value="3">3</option><option value="4">4</option>
         </select>
     </div>
 
     <div id="weaponFields" style="display: none;">
         <label>Нужно копий оружия:</label>
         <input type="number" id="wepCount" value="1" min="1">
-        <label>Уже сделано круток (0-19):</label>
-        <input type="number" id="wepPity" value="0" min="0" max="19">
+        <label>Уже откручено в этом цикле (0-69):</label>
+        <input type="number" id="wepPity" value="0" min="0" max="69">
         <label>Сейчас есть 100% гарант?</label>
         <select id="wepGuaranteed">
-            <option value="no">Нет (50/50)</option>
-            <option value="yes">Да (100%)</option>
+            <option value="no">Нет (шанс 50/50)</option>
+            <option value="yes">Да (100% шанс)</option>
         </select>
     </div>
 
@@ -72,6 +74,7 @@
 
 <script>
     let currentMode = 'char';
+
     function switchTab(mode) {
         currentMode = mode;
         const isChar = mode === 'char';
@@ -93,7 +96,7 @@
         if (currentMode === 'char') {
             const lvls = parseInt(document.getElementById('levels').value) || 0;
             const startStep = parseInt(document.getElementById('currentStep').value);
-            const stepCosts = [10, 5, 10, 10, 0];
+            const stepCosts =;
             const modes = [{n: "Супер гарантия (7 ш/ур)", s: 7}, {n: "Обычная (смешанная)", s: 'mix'}, {n: "Без гарантий (14 ш/ур)", s: 14}];
             modes.forEach(m => {
                 let steps = 0;
@@ -109,42 +112,41 @@
             const currentPity = parseInt(document.getElementById('wepPity').value) || 0;
             const startGuaranteed = document.getElementById('wepGuaranteed').value === 'yes';
 
-            // 1. Супер удача (всегда падает нужное на 20-й крутке)
-            let superSteps = (count * 20) - currentPity;
+            const cycle = 70; // Шагов до леги
 
-            // 2. Обычная (Смешанная 50/50)
-            let mixedSteps = 0;
+            // 1. Супер удача (всегда везет на 50/50)
+            let superCards = (count * cycle) - currentPity;
+
+            // 2. Обычная (Смешанная 50/50: если проигрыш, то +70 карт)
+            let mixedCards = 0;
             let isNextGuaranteed = startGuaranteed;
             for(let i = 0; i < count; i++) {
+                let toNextLeg = (i === 0) ? (cycle - currentPity) : cycle;
                 if (isNextGuaranteed) {
-                    mixedSteps += (i === 0) ? (20 - currentPity) : 20;
-                    isNextGuaranteed = false; // После получения нужного — снова 50/50
+                    mixedCards += toNextLeg;
+                    isNextGuaranteed = false;
                 } else {
-                    // Средне-худший сценарий: один раз проиграл (20), второй раз забрал (20)
-                    mixedSteps += (i === 0) ? (40 - currentPity) : 40;
-                    isNextGuaranteed = false; 
+                    // Считаем худший случай для "Обычной": проиграл 50/50 (+70), потом забрал (+70)
+                    mixedCards += toNextLeg + cycle;
+                    isNextGuaranteed = false;
                 }
             }
 
-            // 3. Худший случай (всегда проигрыш 50/50, получение только через гарант)
-            let worstSteps = 0;
-            let tempGuaranteed = startGuaranteed;
-            for(let i = 0; i < count; i++) {
-                if (tempGuaranteed) {
-                    worstSteps += (i === 0) ? (20 - currentPity) : 20;
-                    tempGuaranteed = false;
-                } else {
-                    worstSteps += (i === 0) ? (40 - currentPity) : 40;
-                    tempGuaranteed = false;
-                }
-            }
+            // 3. Худший сценарий (всегда проигрыш 50/50)
+            let worstCards = (isNextGuaranteed) ? 
+                ((count * 140) - 70 - currentPity) : 
+                ((count * 140) - currentPity);
 
-            out += `<span class="mode-title" style="color:var(--weapon-color)">● Супер удача (всегда на 20)</span>`;
-            out += `Круток: <b>${superSteps}</b> | Кристаллов: <b>${(superSteps * rate).toLocaleString()}</b><br>`;
+            out += `<span class="mode-title" style="color:var(--weapon-color)">● Супер удача (всегда на 70)</span>`;
+            out += `Карт: <b>${superCards}</b> | Кристаллов: <b>${(superCards * rate).toLocaleString()}</b><br>`;
+            
             out += `<span class="mode-title" style="color:var(--weapon-color)">● Обычная (с учетом 50/50)</span>`;
-            out += `Круток: <b>${mixedSteps}</b> | Кристаллов: <b>${(mixedSteps * rate).toLocaleString()}</b><br>`;
-            out += `<span class="mode-title" style="color:var(--weapon-color)">● Худший сценарий</span>`;
-            out += `Круток: <b>${worstSteps}</b> | Кристаллов: <b>${(worstSteps * rate).toLocaleString()}</b><br>`;
+            out += `Карт: <b>${mixedCards}</b> | Кристаллов: <b>${(mixedCards * rate).toLocaleString()}</b><br>`;
+            
+            out += `<span class="mode-title" style="color:var(--weapon-color)">● Худший сценарий (по 140 карт)</span>`;
+            out += `Карт: <b>${worstCards}</b> | Кристаллов: <b>${(worstCards * rate).toLocaleString()}</b><br>`;
+            
+            out += `<p style="font-size:0.7rem; color:#888; margin-top:10px;">* Гарант наступает каждые 70 карточек.</p>`;
         }
         document.getElementById('result').innerHTML = out;
     }
