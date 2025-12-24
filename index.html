@@ -11,7 +11,7 @@
             m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
             m[i].l=1*new Date();
             for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+            k=e.createElement(t),a=e.getElementsByTagName(t),k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
         })(window, document,'script','mc.yandex.ru', 'ym');
         ym(105999900, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
     </script>
@@ -87,7 +87,7 @@
     <div id="weaponFields" style="display: none;">
         <label>Нужно копий оружия:</label>
         <input type="number" id="wepCount" value="1" min="1">
-        <label>Уже откручено в этом цикле (0-69):</label>
+        <label>Откручено в этом цикле (0-69):</label>
         <input type="number" id="wepPity" value="0" min="0" max="69">
         <label>Есть 100% гарант на оружие?</label>
         <select id="wepGuaranteed">
@@ -128,7 +128,7 @@
 
     function calculate() {
         const rate = 180;
-        const stepCosts = [10, 5, 10, 10, 0];
+        const stepCosts =;
         let out = "";
 
         if (currentMode === 'char') {
@@ -150,12 +150,16 @@
                 let isNextGuar = startGuar;
 
                 for (let i = 0; i < count; i++) {
+                    // Учитываем проигрыш 50/50: нужно выбить 2 леги, чтобы получить нужную
                     let legiesToFind = 1;
-                    if (scen.fail === true && !isNextGuar) legiesToFind = 2;
-                    if (scen.fail === "maybe" && !isNextGuar) legiesToFind = 2;
+                    if (scen.fail === true || (scen.fail === "maybe" && !isNextGuar)) {
+                        legiesToFind = 2;
+                    }
 
                     for (let l = 0; l < legiesToFind; l++) {
+                        // Сколько круток до леги в этом конкретном цикле
                         let pulls = (i === 0 && l === 0) ? (currentPity - 20) : cycle;
+
                         for (let p = 0; p < pulls; p++) {
                             totalCards += stepCosts[stepIdx % 5];
                             stepIdx++;
