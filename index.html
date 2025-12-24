@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Banner Calc Pro</title>
+    <title>DMC: POC Calc Pro 2025</title>
     <style>
         :root {
             --primary: #52a055;
@@ -11,139 +11,143 @@
             --card-bg: #2c2c2e;
             --text: #ffffff;
             --secondary: #555557;
+            --weapon-color: #3d85c6;
         }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background: var(--bg); 
-            color: var(--text); 
-            padding: 15px; 
-            margin: 0; 
-            display: flex;
-            justify-content: center;
-        }
-        .card { 
-            background: var(--card-bg); 
-            padding: 20px; 
-            border-radius: 15px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
-            width: 100%;
-            max-width: 400px;
-        }
-        h3 { margin-top: 0; color: var(--primary); font-size: 1.2rem; text-align: center; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; display: flex; justify-content: center; }
+        .card { background: var(--card-bg); padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 100%; max-width: 400px; }
+        .tabs { display: flex; gap: 5px; margin-bottom: 20px; background: #3a3a3c; padding: 5px; border-radius: 10px; }
+        .tab { flex: 1; padding: 10px; text-align: center; cursor: pointer; border-radius: 8px; font-size: 0.9rem; transition: 0.3s; }
+        .tab.active { background: var(--primary); color: white; }
+        .tab.active.weapon-tab { background: var(--weapon-color); }
+        h3 { margin-top: 0; color: var(--primary); text-align: center; }
+        .weapon-title { color: var(--weapon-color) !important; }
         label { display: block; margin: 10px 0 5px; font-size: 0.85rem; color: #aaa; }
-        
-        input, select { 
-            width: 100%; padding: 12px; margin-bottom: 15px; 
-            border-radius: 10px; border: 1px solid #444; 
-            background: #3a3a3c; color: white; box-sizing: border-box; 
-            font-size: 1rem; outline: none;
-        }
-        input:focus { border-color: var(--primary); }
-
+        input, select { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 10px; border: 1px solid #444; background: #3a3a3c; color: white; box-sizing: border-box; font-size: 1rem; }
         .btn-group { display: flex; gap: 10px; margin-top: 10px; }
-        
-        button { 
-            padding: 15px; border: none; border-radius: 10px; 
-            font-weight: bold; cursor: pointer; font-size: 1rem; transition: opacity 0.2s;
-        }
+        button { padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; width: 100%; }
         .btn-calc { background: var(--primary); color: white; flex: 2; }
         .btn-reset { background: var(--secondary); color: white; flex: 1; }
-        button:active { opacity: 0.8; }
-
-        .res { 
-            margin-top: 20px; padding: 15px; background: #3a3a3c; 
-            border-radius: 10px; font-size: 0.9rem; line-height: 1.6;
-        }
-        .mode-title { 
-            color: var(--primary); font-weight: bold; display: block; 
-            margin-top: 10px; border-bottom: 1px solid #555; padding-bottom: 3px;
-        }
-        b { color: #fff; }
+        .res { margin-top: 20px; padding: 15px; background: #3a3a3c; border-radius: 10px; font-size: 0.9rem; line-height: 1.6; }
+        .mode-title { font-weight: bold; display: block; margin-top: 10px; border-bottom: 1px solid #555; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h3>Калькулятор ресурсов</h3>
-        
-        <label>Нужно уровней персонажа:</label>
-        <input type="number" id="levels" value="1" min="1">
-
-        <label>Текущий шаг в цикле (0-4):</label>
-        <select id="currentStep">
-            <option value="0">0 (Начало цикла)</option>
-            <option value="1">1 (Сделан 1 шаг)</option>
-            <option value="2">2 (Сделано 2 шага)</option>
-            <option value="3">3 (Сделано 3 шага)</option>
-            <option value="4">4 (Сделано 4 шага — след. 0)</option>
-        </select>
-
-        <div class="btn-group">
-            <button class="btn-calc" onclick="calc()">Рассчитать</button>
-            <button class="btn-reset" onclick="resetPage()">Сброс</button>
-        </div>
-
-        <div id="result" class="res">Введите данные и нажмите «Рассчитать»</div>
+<div class="card">
+    <div class="tabs">
+        <div id="tabChar" class="tab active" onclick="switchTab('char')">Персонаж</div>
+        <div id="tabWeapon" class="tab" onclick="switchTab('weapon')">Оружие</div>
     </div>
 
-    <script>
-        function calc() {
-            const lvlsInput = document.getElementById('levels').value;
-            const lvls = parseInt(lvlsInput);
-            
-            if (isNaN(lvls) || lvls <= 0) {
-                document.getElementById('result').innerHTML = "⚠️ Введите корректное кол-во уровней";
-                return;
+    <h3 id="mainTitle">Калькулятор Персонажа</h3>
+    
+    <div id="charFields">
+        <label>Нужно уровней персонажа:</label>
+        <input type="number" id="levels" value="1" min="1">
+        <label>Текущий шаг в цикле (0-4):</label>
+        <select id="currentStep">
+            <option value="0">0 (Начало)</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4 (След. 0)</option>
+        </select>
+    </div>
+
+    <div id="weaponFields" style="display: none;">
+        <label>Нужно копий оружия:</label>
+        <input type="number" id="wepCount" value="1" min="1">
+        <label>Уже сделано круток (0-19):</label>
+        <input type="number" id="wepPity" value="0" min="0" max="19">
+        <label>Сейчас есть 100% гарант?</label>
+        <select id="wepGuaranteed">
+            <option value="no">Нет (50/50)</option>
+            <option value="yes">Да (100%)</option>
+        </select>
+    </div>
+
+    <div class="btn-group">
+        <button id="calcBtn" class="btn-calc" onclick="calculate()">Рассчитать</button>
+        <button class="btn-reset" onclick="location.reload()">Сброс</button>
+    </div>
+
+    <div id="result" class="res">Введите данные для расчета</div>
+</div>
+
+<script>
+    let currentMode = 'char';
+    function switchTab(mode) {
+        currentMode = mode;
+        const isChar = mode === 'char';
+        document.getElementById('tabChar').classList.toggle('active', isChar);
+        document.getElementById('tabWeapon').classList.toggle('active', !isChar);
+        document.getElementById('tabWeapon').classList.toggle('weapon-tab', !isChar);
+        document.getElementById('charFields').style.display = isChar ? 'block' : 'none';
+        document.getElementById('weaponFields').style.display = isChar ? 'none' : 'block';
+        const title = document.getElementById('mainTitle');
+        title.innerText = isChar ? 'Калькулятор Персонажа' : 'Калькулятор Оружия';
+        title.className = isChar ? '' : 'weapon-title';
+        document.getElementById('calcBtn').style.background = isChar ? 'var(--primary)' : 'var(--weapon-color)';
+    }
+
+    function calculate() {
+        const rate = 180;
+        let out = "";
+
+        if (currentMode === 'char') {
+            const lvls = parseInt(document.getElementById('levels').value) || 0;
+            const startStep = parseInt(document.getElementById('currentStep').value);
+            const stepCosts = [10, 5, 10, 10, 0];
+            const modes = [{n: "Супер гарантия (7 ш/ур)", s: 7}, {n: "Обычная (смешанная)", s: 'mix'}, {n: "Без гарантий (14 ш/ур)", s: 14}];
+            modes.forEach(m => {
+                let steps = 0;
+                if(m.s === 'mix') { for(let i=1; i<=lvls; i++) steps += (i % 5 <= 3 && i % 5 !== 0) ? 14 : 7; } 
+                else { steps = lvls * m.s; }
+                let cards = 0;
+                for (let i = 0; i < steps; i++) cards += stepCosts[(startStep + i) % 5];
+                out += `<span class="mode-title" style="color:var(--primary)">● ${m.n}</span>`;
+                out += `Карт: <b>${cards}</b> | Кристаллов: <b>${(cards * rate).toLocaleString()}</b><br>`;
+            });
+        } else {
+            const count = parseInt(document.getElementById('wepCount').value) || 0;
+            const currentPity = parseInt(document.getElementById('wepPity').value) || 0;
+            const startGuaranteed = document.getElementById('wepGuaranteed').value === 'yes';
+
+            // 1. Супер удача (всегда падает нужное на 20-й крутке)
+            let superSteps = (count * 20) - currentPity;
+
+            // 2. Обычная (Смешанная 50/50)
+            let mixedSteps = 0;
+            let isNextGuaranteed = startGuaranteed;
+            for(let i = 0; i < count; i++) {
+                if (isNextGuaranteed) {
+                    mixedSteps += (i === 0) ? (20 - currentPity) : 20;
+                    isNextGuaranteed = false; // После получения нужного — снова 50/50
+                } else {
+                    // Средне-худший сценарий: один раз проиграл (20), второй раз забрал (20)
+                    mixedSteps += (i === 0) ? (40 - currentPity) : 40;
+                    isNextGuaranteed = false; 
+                }
             }
 
-            const startStep = parseInt(document.getElementById('currentStep').value);
-            const stepCosts = [10, 5, 10, 10, 0]; // Стоимость 5 шагов
-            const rate = 180;
-            let out = "";
-
-            const modes = [
-                {n: "💎 Супер гарантия (7 ш/ур)", type: "super"},
-                {n: "⚖️ Обычная (3 без / 2 с гар)", type: "normal"},
-                {n: "💀 Без гарантий (14 ш/ур)", type: "none"}
-            ];
-
-            modes.forEach(m => {
-                let totalSteps = 0;
-                
-                // 1. Логика определения общего кол-ва шагов
-                if(m.type === "super") {
-                    totalSteps = lvls * 7;
-                } else if(m.type === "none") {
-                    totalSteps = lvls * 14;
+            // 3. Худший случай (всегда проигрыш 50/50, получение только через гарант)
+            let worstSteps = 0;
+            let tempGuaranteed = startGuaranteed;
+            for(let i = 0; i < count; i++) {
+                if (tempGuaranteed) {
+                    worstSteps += (i === 0) ? (20 - currentPity) : 20;
+                    tempGuaranteed = false;
                 } else {
-                    for(let i=1; i<=lvls; i++) {
-                        // Обычная: каждые 5 уровней: 3 по 14 шагов, 2 по 7 шагов
-                        totalSteps += (i % 5 <= 3 && i % 5 !== 0) ? 14 : 7;
-                    }
+                    worstSteps += (i === 0) ? (40 - currentPity) : 40;
+                    tempGuaranteed = false;
                 }
+            }
 
-                // 2. Логика расчета стоимости с учетом текущего шага (смещения)
-                let totalCards = 0;
-                for (let i = 0; i < totalSteps; i++) {
-                    // Используем остаток от деления для цикличного прохода по массиву стоимостей
-                    totalCards += stepCosts[(startStep + i) % 5];
-                }
-
-                const crystals = totalCards * rate;
-
-                out += `<span class="mode-title">${m.n}</span>`;
-                out += `Всего шагов: <b>${totalSteps}</b><br>`;
-                out += `Нужно карт: <b>${totalCards}</b> шт.<br>`;
-                out += `Кристаллов: <b>${crystals.toLocaleString()}</b><br>`;
-            });
-
-            document.getElementById('result').innerHTML = out;
+            out += `<span class="mode-title" style="color:var(--weapon-color)">● Супер удача (всегда на 20)</span>`;
+            out += `Круток: <b>${superSteps}</b> | Кристаллов: <b>${(superSteps * rate).toLocaleString()}</b><br>`;
+            out += `<span class="mode-title" style="color:var(--weapon-color)">● Обычная (с учетом 50/50)</span>`;
+            out += `Круток: <b>${mixedSteps}</b> | Кристаллов: <b>${(mixedSteps * rate).toLocaleString()}</b><br>`;
+            out += `<span class="mode-title" style="color:var(--weapon-color)">● Худший сценарий</span>`;
+            out += `Круток: <b>${worstSteps}</b> | Кристаллов: <b>${(worstSteps * rate).toLocaleString()}</b><br>`;
         }
-
-        function resetPage() {
-            // Мгновенная перезагрузка для сброса всех полей
-            window.location.reload();
-        }
-    </script>
+        document.getElementById('result').innerHTML = out;
+    }
+</script>
 </body>
 </html>
