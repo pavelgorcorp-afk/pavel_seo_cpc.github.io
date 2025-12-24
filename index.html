@@ -32,9 +32,8 @@
 
   <style>
     :root {
-      /* ✅ Цвета по твоему запросу */
-      --char-color: #3d85c6;   /* синий = Персонаж */
-      --weapon-color: #c0392b; /* красный = Оружие */
+      --char-color: #3d85c6;   /* Персонаж: синий */
+      --weapon-color: #c0392b; /* Оружие: красный */
 
       --bg: #1c1c1e;
       --card-bg: #2c2c2e;
@@ -78,10 +77,7 @@
       color: #aaa;
       user-select: none;
     }
-
-    /* ✅ Активная вкладка по умолчанию = персонаж (синий) */
     .tab.active { background: var(--char-color); color: white; }
-    /* ✅ Активная вкладка оружия (красный) */
     .tab.active.weapon-tab { background: var(--weapon-color); }
 
     h3 {
@@ -245,7 +241,7 @@
       document.getElementById("calcBtn").style.background = isChar ? "var(--char-color)" : "var(--weapon-color)";
     }
 
-    // Персонаж
+    // Персонаж (стоимость шагов 10/5/10/10/0)
     function calculateCharacter(count, startStep, currentPity, startGuaranteed) {
       const stepCosts = [10, 5, 10, 10, 0];
       const cyclePulls = 70;
@@ -286,7 +282,9 @@
 
       const luckyLeg = count;
       const mixedLeg = startGuaranteed ? (2 * count - 1) : (2 * count);
-      const worstLeg = 2 * count;
+
+      // ✅ FIX #1: худший случай учитывает стартовый 100% гарант
+      const worstLeg = startGuaranteed ? (2 * count - 1) : (2 * count);
 
       return {
         lucky: simulateByTotalLegendaries(luckyLeg),
@@ -295,7 +293,7 @@
       };
     }
 
-    // Оружие (1 pull = 1 card)
+    // Оружие (1 pull = 1 card), но средний сценарий = математическое ожидание 50/50
     function calculateWeapon(count, currentPity, startGuaranteed) {
       const cyclePulls = 70;
       const crystalRate = 180;
@@ -322,8 +320,15 @@
       }
 
       const luckyLeg = count;
-      const mixedLeg = startGuaranteed ? (2 * count - 1) : (2 * count);
-      const worstLeg = 2 * count;
+
+      // ✅ FIX #2: средний сценарий НЕ равен худшему
+      // ожидание легендарок:
+      // - без гаранта: 1.5 леги на копию
+      // - с гарантом: 1 лега на 1-ю копию + 1.5 на остальные => 1.5*count - 0.5
+      const mixedLeg = startGuaranteed ? (1.5 * count - 0.5) : (1.5 * count);
+
+      // Худший случай учитывает стартовый гарант (первая копия точно за 1 легу)
+      const worstLeg = startGuaranteed ? (2 * count - 1) : (2 * count);
 
       return {
         lucky: simulateByTotalLegendaries(luckyLeg),
@@ -346,10 +351,10 @@
         out += `<span class="mode-title" style="color:var(--char-color)">● Супер удача (всегда на 70)</span>`;
         out += `Карт: <b>${res.lucky.cards}</b> | Кристаллов: <b>${res.lucky.crystals.toLocaleString()}</b><br>`;
 
-        out += `<span class="mode-title" style="color:var(--char-color)">● Обычная (среднее 50/50)</span>`;
+        out += `<span class="mode-title" style="color:var(--char-color)">● Обычная (усреднённый худший)</span>`;
         out += `Карт: <b>${res.mixed.cards}</b> | Кристаллов: <b>${res.mixed.crystals.toLocaleString()}</b><br>`;
 
-        out += `<span class="mode-title" style="color:var(--char-color)">● Худший случай (по 140)</span>`;
+        out += `<span class="mode-title" style="color:var(--char-color)">● Худший случай</span>`;
         out += `Карт: <b>${res.worst.cards}</b> | Кристаллов: <b>${res.worst.crystals.toLocaleString()}</b><br>`;
 
       } else {
@@ -362,17 +367,17 @@
         out += `<span class="mode-title" style="color:var(--weapon-color)">● Супер удача (70 на копию)</span>`;
         out += `Карт: <b>${res.lucky.cards}</b> | Кристаллов: <b>${res.lucky.crystals.toLocaleString()}</b><br>`;
 
-        out += `<span class="mode-title" style="color:var(--weapon-color)">● Обычная (шанс 50/50)</span>`;
+        out += `<span class="mode-title" style="color:var(--weapon-color)">● Обычная (мат. ожидание 50/50)</span>`;
         out += `Карт: <b>${res.mixed.cards}</b> | Кристаллов: <b>${res.mixed.crystals.toLocaleString()}</b><br>`;
 
-        out += `<span class="mode-title" style="color:var(--weapon-color)">● Худший случай (по 140)</span>`;
+        out += `<span class="mode-title" style="color:var(--weapon-color)">● Худший случай</span>`;
         out += `Карт: <b>${res.worst.cards}</b> | Кристаллов: <b>${res.worst.crystals.toLocaleString()}</b><br>`;
       }
 
       document.getElementById("result").innerHTML = out;
     }
 
-    // ✅ СБРОС: очищает значения и результат, НО ОСТАВЛЯЕТ текущую вкладку
+    // СБРОС: значения + результат, но вкладка остаётся
     function resetPage() {
       if (currentMode === "char") {
         document.getElementById("levels").value = 1;
@@ -386,12 +391,10 @@
       }
 
       document.getElementById("result").innerHTML = "Результаты появятся здесь...";
-
-      // обновим заголовок/цвет кнопки, но вкладку НЕ меняем
       switchTab(currentMode);
     }
 
-    // на всякий случай фиксируем корректные цвета при первом открытии
+    // зафиксировать начальные цвета/состояние
     switchTab(currentMode);
   </script>
 </body>
