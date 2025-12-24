@@ -1,53 +1,105 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Калькулятор Уровней 2025</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banner Calc Pro</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f4f4f9; }
-        .card { background: white; padding: 20px; border-radius: 10px; max-width: 400px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        input { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
-        button { width: 100%; background: #4CAF50; color: white; padding: 10px; border: none; cursor: pointer; }
-        .res { margin-top: 20px; white-space: pre-wrap; font-family: monospace; }
+        :root {
+            --primary: #52a055;
+            --bg: #1c1c1e;
+            --card-bg: #2c2c2e;
+            --text: #ffffff;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); padding: 15px; margin: 0; }
+        .card { background: var(--card-bg); padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        h3 { margin-top: 0; color: var(--primary); font-size: 1.2rem; }
+        label { display: block; margin: 10px 0 5px; font-size: 0.9rem; color: #aaa; }
+        input, select { 
+            width: 100%; padding: 12px; margin-bottom: 15px; 
+            border-radius: 8px; border: 1px solid #444; 
+            background: #3a3a3c; color: white; box-sizing: border-box; 
+            font-size: 1rem;
+        }
+        button { 
+            width: 100%; background: var(--primary); color: white; 
+            padding: 15px; border: none; border-radius: 8px; 
+            font-weight: bold; cursor: pointer; font-size: 1rem;
+        }
+        button:active { background: #458a48; }
+        .res { 
+            margin-top: 20px; padding: 15px; background: #3a3a3c; 
+            border-radius: 10px; font-size: 0.9rem; line-height: 1.5;
+        }
+        .mode-title { color: var(--primary); font-weight: bold; display: block; margin-top: 10px; border-bottom: 1px solid #555; }
     </style>
 </head>
 <body>
+
     <div class="card">
-        <h3>Калькулятор Ресурсов</h3>
-        Введите кол-во уровней:
-        <input type="number" id="levels" value="6">
-        <button onclick="calc()">Рассчитать</button>
-        <div id="result" class="res"></div>
+        <h3>Калькулятор ресурсов</h3>
+        
+        <label>Нужно уровней персонажа:</label>
+        <input type="number" id="levels" value="1" min="1">
+
+        <label>Текущий шаг в цикле (0-4):</label>
+        <select id="currentStep">
+            <option value="0">0 (Начало цикла)</option>
+            <option value="1">1 (Сделан 1 шаг)</option>
+            <option value="2">2 (Сделано 2 шага)</option>
+            <option value="3">3 (Сделано 3 шага)</option>
+            <option value="4">4 (Сделано 4 шага - след. БЕСПЛАТНЫЙ)</option>
+        </select>
+
+        <button onclick="calc()">Рассчитать итог</button>
+
+        <div id="result" class="res">Результаты появятся здесь...</div>
     </div>
 
     <script>
         function calc() {
-            let lvls = parseInt(document.getElementById('levels').value);
-            let stepCosts = [10, 5, 10, 10, 0];
-            let rate = 180;
+            const lvls = parseInt(document.getElementById('levels').value);
+            const startStep = parseInt(document.getElementById('currentStep').value);
+            const stepCosts = [10, 5, 10, 10, 0]; // 5 шагов
+            const rate = 180;
             let out = "";
 
-            let modes = [
-                {n: "Супер гарантия (7 ш/ур)", type: "super"},
-                {n: "Обычная (3 без/2 с гар)", type: "normal"},
-                {n: "Без гарантий (14 ш/ур)", type: "none"}
+            const modes = [
+                {n: "💎 Супер гарантия (7 ш/ур)", type: "super"},
+                {n: "⚖️ Обычная (3 без / 2 с гар)", type: "normal"},
+                {n: "💀 Без гарантий (14 ш/ур)", type: "none"}
             ];
 
             modes.forEach(m => {
-                let steps = 0;
-                if(m.type === "super") steps = lvls * 7;
-                else if(m.type === "none") steps = lvls * 14;
-                else {
-                    for(let i=1; i<=lvls; i++) steps += (i % 5 <= 3 && i % 5 !== 0) ? 14 : 7;
+                let totalSteps = 0;
+                
+                // 1. Считаем сколько всего шагов нужно сделать
+                if(m.type === "super") {
+                    totalSteps = lvls * 7;
+                } else if(m.type === "none") {
+                    totalSteps = lvls * 14;
+                } else {
+                    for(let i=1; i<=lvls; i++) {
+                        totalSteps += (i % 5 <= 3 && i % 5 !== 0) ? 14 : 7;
+                    }
                 }
 
-                let fullCycles = Math.floor(steps / 5);
-                let remSteps = steps % 5;
-                let cards = fullCycles * 35;
-                for(let i=0; i<remSteps; i++) cards += stepCosts[i];
+                // 2. Считаем стоимость карточек с учетом смещения (startStep)
+                let totalCards = 0;
+                for (let i = 0; i < totalSteps; i++) {
+                    // (startStep + i) % 5 берет правильную стоимость из массива по кругу
+                    totalCards += stepCosts[(startStep + i) % 5];
+                }
 
-                out += `● ${m.n}\n Шагов: ${steps}\n Карточек: ${cards}\n Кристаллов: ${(cards*rate).toLocaleString()}\n\n`;
+                const crystals = totalCards * rate;
+
+                out += `<span class="mode-title">${m.n}</span>`;
+                out += `Шагов: <b>${totalSteps}</b><br>`;
+                out += `Карточек: <b>${totalCards}</b> шт.<br>`;
+                out += `Кристаллов: <b>${crystals.toLocaleString()}</b><br><br>`;
             });
-            document.getElementById('result').innerText = out;
+
+            document.getElementById('result').innerHTML = out;
         }
     </script>
 </body>
