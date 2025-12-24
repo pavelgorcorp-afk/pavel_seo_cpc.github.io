@@ -235,12 +235,67 @@
       document.getElementById("calcBtn").style.background = isChar ? "var(--primary)" : "var(--weapon-color)";
     }
 
+    // ✅ Персонаж: логика строго по твоему промту
+    function calculateCharacter(count, startStep, currentPity, startGuaranteed) {
+      const stepCosts = [10, 5, 10, 10, 0]; // стоимость 10-крутки по шагам
+      const cyclePulls = 70;                // пуллов на легендарку
+      const pullsPerStep = 10;              // 1 шаг = 10 пуллов
+      const cycleSteps = cyclePulls / pullsPerStep; // 7 шагов на 70 пуллов
+      const crystalRate = 180;
+
+      count = Math.max(0, parseInt(count) || 0);
+      startStep = ((parseInt(startStep) || 0) % 5 + 5) % 5;
+      currentPity = Math.min(90, Math.max(20, parseInt(currentPity) || 90));
+      startGuaranteed = !!startGuaranteed;
+
+      // по промту: первая легендарка требует currentPity - 20 пуллов
+      const firstLegendPulls = Math.max(0, currentPity - 20);
+      const firstLegendSteps = Math.ceil(firstLegendPulls / pullsPerStep);
+
+      function simulateByTotalLegendaries(totalLegendaries) {
+        if (count === 0 || totalLegendaries === 0) {
+          return { cards: 0, crystals: 0, steps: 0, legendaries: 0 };
+        }
+
+        const totalSteps = firstLegendSteps + (totalLegendaries - 1) * cycleSteps;
+
+        let stepIdx = startStep;
+        let totalCards = 0;
+
+        for (let i = 0; i < totalSteps; i++) {
+          totalCards += stepCosts[stepIdx % 5];
+          stepIdx++;
+        }
+
+        return {
+          cards: totalCards,
+          crystals: totalCards * crystalRate,
+          steps: totalSteps,
+          legendaries: totalLegendaries
+        };
+      }
+
+      // сценарии:
+      // lucky: 1 легендарка = 1 копия
+      const luckyLeg = count;
+
+      // mixed: "усредненный худший" по промту
+      // - если стартовый гарант есть -> 1-я копия за 70 (1 лега), остальные по 140 (2 леги/копия)
+      // - если гаранта нет -> каждая копия по 140 (2 леги/копия)
+      const mixedLeg = startGuaranteed ? (2 * count - 1) : (2 * count);
+
+      // worst: всегда по 140 => 2 легендарки на копию
+      const worstLeg = 2 * count;
+
+      return {
+        lucky: simulateByTotalLegendaries(luckyLeg),
+        mixed: simulateByTotalLegendaries(mixedLeg),
+        worst: simulateByTotalLegendaries(worstLeg)
+      };
+    }
+
     function calculate() {
-      const rate = 180;
-
-      // ✅ Стоимость шагов 1..5: 10, 5, 10, 10, 0
-      const stepCosts = [10, 5, 10, 10, 0];
-
+      const rate = 180; // для оружия (оставлено как было)
       let out = "";
 
       if (currentMode === "char") {
@@ -248,44 +303,20 @@
         const startStep = parseInt(document.getElementById("currentStep").value);
         const currentPity = parseInt(document.getElementById("charPity").value) || 90;
         const startGuar = document.getElementById("charGuaranteed").value === "yes";
-        const cycle = 70; // (90 - 20)
 
-        const scenarios = [
-          { n: "Супер удача (всегда на 70)", type: "lucky" },
-          { n: "Обычная (среднее 50/50)", type: "mixed" },
-          { n: "Худший случай (по 140)", type: "worst" }
-        ];
+        const res = calculateCharacter(count, startStep, currentPity, startGuar);
 
-        scenarios.forEach((scen) => {
-          let totalCards = 0;
-          let stepIdx = startStep;
-          let isNextGuar = startGuar;
-          let pityCursor = currentPity;
+        out += `<span class="mode-title" style="color:var(--primary)">● Супер удача (всегда на 70)</span>`;
+        out += `Карт: <b>${res.lucky.cards}</b> | Кристаллов: <b>${res.lucky.crystals.toLocaleString()}</b><br>`;
 
-          for (let i = 0; i < count; i++) {
-            let legiesToFind = 1;
-            if (scen.type === "worst" || (scen.type === "mixed" && !isNextGuar)) {
-              legiesToFind = 2;
-            }
+        out += `<span class="mode-title" style="color:var(--primary)">● Обычная (среднее 50/50)</span>`;
+        out += `Карт: <b>${res.mixed.cards}</b> | Кристаллов: <b>${res.mixed.crystals.toLocaleString()}</b><br>`;
 
-            for (let l = 0; l < legiesToFind; l++) {
-              let pullsNeeded = pityCursor > 20 ? (pityCursor - 20) : cycle;
-
-              for (let p = 0; p < pullsNeeded; p++) {
-                totalCards += stepCosts[stepIdx % 5];
-                stepIdx++;
-              }
-
-              pityCursor = 90;     // сброс после леги
-              isNextGuar = false;  // гарант "сгорел"
-            }
-          }
-
-          out += `<span class="mode-title" style="color:var(--primary)">● ${scen.n}</span>`;
-          out += `Карт: <b>${totalCards}</b> | Кристаллов: <b>${(totalCards * rate).toLocaleString()}</b><br>`;
-        });
+        out += `<span class="mode-title" style="color:var(--primary)">● Худший случай (по 140)</span>`;
+        out += `Карт: <b>${res.worst.cards}</b> | Кристаллов: <b>${res.worst.crystals.toLocaleString()}</b><br>`;
 
       } else {
+        // Оружие — оставлено как в твоём рабочем варианте
         const count = parseInt(document.getElementById("wepCount").value) || 0;
         const currentPity = parseInt(document.getElementById("wepPity").value) || 0;
         const startG = document.getElementById("wepGuaranteed").value === "yes";
@@ -297,19 +328,11 @@
         let nextG = startG;
         for (let i = 0; i < count; i++) {
           let toNext = (i === 0) ? (cycle - currentPity) : cycle;
-
-          if (nextG) {
-            mixedC += toNext;
-            nextG = false;
-          } else {
-            mixedC += toNext + cycle;
-            nextG = false;
-          }
+          if (nextG) { mixedC += toNext; nextG = false; }
+          else { mixedC += toNext + cycle; nextG = false; }
         }
 
-        let worstC = startG
-          ? ((count * 140) - 70 - currentPity)
-          : ((count * 140) - currentPity);
+        let worstC = startG ? ((count * 140) - 70 - currentPity) : ((count * 140) - currentPity);
 
         out += `<span class="mode-title" style="color:var(--weapon-color)">● Супер удача (70 на копию)</span>`;
         out += `Карт: <b>${superC}</b> | Кристаллов: <b>${(superC * rate).toLocaleString()}</b><br>`;
