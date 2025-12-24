@@ -128,8 +128,7 @@
 
     function calculate() {
         const rate = 180;
-        // ИСПРАВЛЕНО: Добавлен массив стоимостей шагов
-        const stepCosts = [10, 5, 10, 10, 0];
+        const stepCosts =; // Стоимость шагов персонажа
         let out = "";
 
         if (currentMode === 'char') {
@@ -137,35 +136,38 @@
             const startStep = parseInt(document.getElementById('currentStep').value);
             const currentPity = parseInt(document.getElementById('charPity').value) || 90;
             const startGuar = document.getElementById('charGuaranteed').value === 'yes';
-            const cycle = 70; // До леги (90 - 20)
+            const cycle = 70; // 90 - 20 = 70 круток до леги
 
             const scenarios = [
-                {n: "Супер удача (всегда на 70)", fail: false},
-                {n: "Обычная (среднее 50/50)", fail: "maybe"},
-                {n: "Худший случай (по 140)", fail: true}
+                {n: "Супер удача (всегда на 70)", type: "lucky"},
+                {n: "Обычная (среднее 50/50)", type: "mixed"},
+                {n: "Худший случай (по 140)", type: "worst"}
             ];
 
             scenarios.forEach(scen => {
                 let totalCards = 0;
                 let stepIdx = startStep;
                 let isNextGuar = startGuar;
+                let pityCursor = currentPity;
 
                 for (let i = 0; i < count; i++) {
-                    let legiesToFind = 1;
-                    if (scen.fail === true || (scen.fail === "maybe" && !isNextGuar)) {
-                        legiesToFind = 2;
+                    // Определяем, сколько нужно легенадрок (1 или 2) для получения нужной копии
+                    let legiesNeeded = 1;
+                    if (scen.type === "worst" || (scen.type === "mixed" && !isNextGuar)) {
+                        legiesNeeded = 2;
                     }
 
-                    for (let l = 0; l < legiesToFind; l++) {
-                        // Сколько круток до леги в этом конкретном цикле
-                        // Первая копия считает от текущего Pity, остальные по 70
-                        let pulls = (i === 0 && l === 0) ? (currentPity - 20) : cycle;
-
-                        for (let p = 0; p < pulls; p++) {
+                    for (let l = 0; l < legiesNeeded; l++) {
+                        // Сколько круток до леги в этом конкретном цикле (либо от Pity, либо 70)
+                        let pullsNeeded = (pityCursor > 20) ? (pityCursor - 20) : cycle;
+                        
+                        for (let p = 0; p < pullsNeeded; p++) {
                             totalCards += stepCosts[stepIdx % 5];
                             stepIdx++;
                         }
-                        isNextGuar = false; 
+                        
+                        pityCursor = 90; // Счетчик сбросился до 90 после леги
+                        isNextGuar = false; // Гарант сгорел
                     }
                 }
                 out += `<span class="mode-title" style="color:var(--primary)">● ${scen.n}</span>`;
