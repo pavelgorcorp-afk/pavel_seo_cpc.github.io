@@ -128,7 +128,8 @@
 
     function calculate() {
         const rate = 180;
-        const stepCosts =; // Стоимость шагов персонажа
+        // ИСПРАВЛЕНО: Добавлен массив стоимостей шагов
+        const stepCosts =;
         let out = "";
 
         if (currentMode === 'char') {
@@ -136,7 +137,7 @@
             const startStep = parseInt(document.getElementById('currentStep').value);
             const currentPity = parseInt(document.getElementById('charPity').value) || 90;
             const startGuar = document.getElementById('charGuaranteed').value === 'yes';
-            const cycle = 70; // 90 - 20 = 70 круток до леги
+            const cycle = 70; // До леги (90 - 20)
 
             const scenarios = [
                 {n: "Супер удача (всегда на 70)", type: "lucky"},
@@ -151,14 +152,12 @@
                 let pityCursor = currentPity;
 
                 for (let i = 0; i < count; i++) {
-                    // Определяем, сколько нужно легенадрок (1 или 2) для получения нужной копии
-                    let legiesNeeded = 1;
+                    let legiesToFind = 1;
                     if (scen.type === "worst" || (scen.type === "mixed" && !isNextGuar)) {
-                        legiesNeeded = 2;
+                        legiesToFind = 2;
                     }
 
-                    for (let l = 0; l < legiesNeeded; l++) {
-                        // Сколько круток до леги в этом конкретном цикле (либо от Pity, либо 70)
+                    for (let l = 0; l < legiesToFind; l++) {
                         let pullsNeeded = (pityCursor > 20) ? (pityCursor - 20) : cycle;
                         
                         for (let p = 0; p < pullsNeeded; p++) {
