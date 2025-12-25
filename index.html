@@ -7,14 +7,14 @@
 
   <!-- Yandex.Metrika counter -->
   <script type="text/javascript">
-      (function(m,e,t,r,i,k,a){
-          m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-          m[i].l=1*new Date();
-          for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-          k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-      })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=105999900', 'ym');
+    (function(m,e,t,r,i,k,a){
+      m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+      m[i].l=1*new Date();
+      for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+      k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=105999900', 'ym');
 
-      ym(105999900, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
+    ym(105999900, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
   </script>
   <noscript><div><img src="https://mc.yandex.ru/watch/105999900" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
   <!-- /Yandex.Metrika counter -->
@@ -244,15 +244,21 @@
       currentPity = Math.min(90, Math.max(20, parseInt(currentPity) || 90));
       startGuaranteed = !!startGuaranteed;
 
+      if (count === 0) {
+        return {
+          lucky: { cards: 0, crystals: 0 },
+          mixed: { cards: 0, crystals: 0 },
+          worst: { cards: 0, crystals: 0 }
+        };
+      }
+
       const firstLegendPulls = Math.max(0, currentPity - 20);
       const firstLegendSteps = Math.ceil(firstLegendPulls / pullsPerStep);
 
-      function simulateByTotalLegendaries(totalLegendaries) {
-        if (count === 0 || totalLegendaries === 0) {
-          return { cards: 0, crystals: 0, steps: 0, legendaries: 0 };
-        }
+      function simulateByTotalCycles(totalCycles) {
+        if (totalCycles <= 0) return { cards: 0, crystals: 0, steps: 0, cycles: 0 };
 
-        const totalSteps = firstLegendSteps + (totalLegendaries - 1) * cycleSteps;
+        const totalSteps = firstLegendSteps + (totalCycles - 1) * cycleSteps;
 
         let stepIdx = startStep;
         let totalCards = 0;
@@ -266,20 +272,25 @@
           cards: totalCards,
           crystals: totalCards * crystalRate,
           steps: totalSteps,
-          legendaries: totalLegendaries
+          cycles: totalCycles
         };
       }
 
-      const luckyLeg = count;
-      const mixedLeg = startGuaranteed ? (2 * count - 1) : (2 * count);
+      // ✅ Супер удача: 0 проигрышей -> циклов = count
+      const luckyCycles = count;
 
-      // ✅ FIX #1: Худший случай учитывает стартовый 100% гарант
-      const worstLeg = startGuaranteed ? (2 * count - 1) : (2 * count);
+      // ✅ Обычная: проигрышей ~ половина 50/50 попыток
+      const attempts = startGuaranteed ? Math.max(0, count - 1) : count;
+      const lossesAvg = Math.floor(attempts / 2);
+      const mixedCycles = count + lossesAvg;
+
+      // ✅ Худший: проигрыш на каждой 50/50 попытке
+      const worstCycles = startGuaranteed ? (2 * count - 1) : (2 * count);
 
       return {
-        lucky: simulateByTotalLegendaries(luckyLeg),
-        mixed: simulateByTotalLegendaries(mixedLeg),
-        worst: simulateByTotalLegendaries(worstLeg)
+        lucky: simulateByTotalCycles(luckyCycles),
+        mixed: simulateByTotalCycles(mixedCycles),
+        worst: simulateByTotalCycles(worstCycles)
       };
     }
 
@@ -292,37 +303,44 @@
       currentPity = Math.min(90, Math.max(20, parseInt(currentPity) || 90));
       startGuaranteed = !!startGuaranteed;
 
+      if (count === 0) {
+        return {
+          lucky: { cards: 0, crystals: 0 },
+          mixed: { cards: 0, crystals: 0 },
+          worst: { cards: 0, crystals: 0 }
+        };
+      }
+
       const firstLegendPulls = Math.max(0, currentPity - 20);
 
-      function simulateByTotalLegendaries(totalLegendaries) {
-        if (count === 0 || totalLegendaries === 0) {
-          return { cards: 0, crystals: 0, pulls: 0, legendaries: 0 };
-        }
+      function simulateByTotalCycles(totalCycles) {
+        if (totalCycles <= 0) return { cards: 0, crystals: 0, pulls: 0, cycles: 0 };
 
-        const totalPulls = firstLegendPulls + (totalLegendaries - 1) * cyclePulls;
+        const totalPulls = firstLegendPulls + (totalCycles - 1) * cyclePulls;
 
         return {
           cards: totalPulls,
           pulls: totalPulls,
           crystals: totalPulls * crystalRate,
-          legendaries: totalLegendaries
+          cycles: totalCycles
         };
       }
 
-      const luckyLeg = count;
+      // ✅ Супер удача: циклов = count
+      const luckyCycles = count;
 
-      // ✅ FIX #2: "Обычная" теперь не равна "Худшему" (мат. ожидание 50/50)
-      // - без гаранта: 1.5 леги на копию
-      // - с гарантом: 1 лега на 1-ю копию, дальше по 1.5 => 1.5*count - 0.5
-      const mixedLeg = startGuaranteed ? (1.5 * count - 0.5) : (1.5 * count);
+      // ✅ Обычная: проигрышей ~ половина 50/50 попыток
+      const attempts = startGuaranteed ? Math.max(0, count - 1) : count;
+      const lossesAvg = Math.floor(attempts / 2);
+      const mixedCycles = count + lossesAvg;
 
-      // Худший случай также учитывает стартовый гарант
-      const worstLeg = startGuaranteed ? (2 * count - 1) : (2 * count);
+      // ✅ Худший: проигрыш на каждой 50/50 попытке
+      const worstCycles = startGuaranteed ? (2 * count - 1) : (2 * count);
 
       return {
-        lucky: simulateByTotalLegendaries(luckyLeg),
-        mixed: simulateByTotalLegendaries(mixedLeg),
-        worst: simulateByTotalLegendaries(worstLeg)
+        lucky: simulateByTotalCycles(luckyCycles),
+        mixed: simulateByTotalCycles(mixedCycles),
+        worst: simulateByTotalCycles(worstCycles)
       };
     }
 
