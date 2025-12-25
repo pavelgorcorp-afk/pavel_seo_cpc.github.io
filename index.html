@@ -39,6 +39,7 @@
       display: flex;
       justify-content: center;
     }
+
     .card {
       background: var(--card-bg);
       padding: 20px;
@@ -46,7 +47,42 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
       width: 100%;
       max-width: 400px;
+
+      /* фон только внутри карточки */
+      position: relative;
+      overflow: hidden;
     }
+
+    /* === Background images ONLY inside the card === */
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: var(--card-bg-img);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: 0.35; /* сила картинки */
+      z-index: 0;
+      transition: opacity .25s ease, background-image .25s ease;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.65); /* сила затемнения */
+      z-index: 1;
+    }
+
+    .card > * {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* файлы лежат рядом с index.html */
+    .card.mode-char   { --card-bg-img: url("./char.jpg"); }
+    .card.mode-weapon { --card-bg-img: url("./weapons.jpg"); }
 
     /* top bar: tabs + language */
     .topbar{
@@ -371,12 +407,10 @@
 
       translateOptions();
 
-      // title depends on tab
       const title = document.getElementById("mainTitle");
       const isChar = currentMode === "char";
       title.innerText = isChar ? t.titleChar : t.titleWeapon;
 
-      // placeholder: translate if it's currently placeholder
       const resEl = document.getElementById("result");
       const ruP = I18N.ru.resultPlaceholder;
       const enP = I18N.en.resultPlaceholder;
@@ -384,7 +418,7 @@
       if (resEl && (resEl.innerText.trim() === ruP || resEl.innerText.trim() === enP)) {
         resEl.innerText = t.resultPlaceholder;
       } else {
-        calculate(); // re-render results with new language labels
+        calculate();
       }
 
       if (persist) {
@@ -409,6 +443,11 @@
       title.className = isChar ? "" : "weapon-title";
 
       document.getElementById("calcBtn").style.background = isChar ? "var(--char-color)" : "var(--weapon-color)";
+
+      // ✅ фон только под карточкой
+      const card = document.querySelector(".card");
+      card.classList.toggle("mode-char", isChar);
+      card.classList.toggle("mode-weapon", !isChar);
     }
 
     // Персонаж
@@ -572,12 +611,12 @@
       switchTab(currentMode);
     }
 
-    // init
+    // init tab + background
     switchTab(currentMode);
 
-    // ✅ Автовыбор языка:
-    // 1) если есть сохраненный язык -> он
-    // 2) иначе по браузеру: ru* -> RU, иначе EN
+    // ✅ auto language:
+    // 1) saved lang -> use it
+    // 2) else browser language: ru* => RU, else EN
     (function initLanguage(){
       let saved = null;
       try { saved = localStorage.getItem("dmc_lang"); } catch(e){}
@@ -585,7 +624,6 @@
         setLang(saved, false);
         return;
       }
-
       const nav = (navigator.language || navigator.userLanguage || "en").toLowerCase();
       const auto = nav.startsWith("ru") ? "ru" : "en";
       setLang(auto, true);
