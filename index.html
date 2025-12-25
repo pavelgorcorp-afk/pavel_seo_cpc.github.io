@@ -46,44 +46,24 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
       width: 100%;
       max-width: 400px;
-      position: relative;
     }
 
-    /* Language switch */
-    .lang-switch {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      display: flex;
-      gap: 6px;
-      background: #3a3a3c;
-      padding: 5px;
-      border-radius: 10px;
-    }
-    .lang-btn {
-      padding: 6px 10px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      background: transparent;
-      color: #aaa;
-      font-weight: 700;
-      font-size: 0.85rem;
-      line-height: 1;
-    }
-    .lang-btn.active {
-      background: #4a4a4c;
-      color: #fff;
+    /* top bar: tabs + language */
+    .topbar{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom: 20px;
     }
 
     .tabs {
+      flex: 1;
       display: flex;
       gap: 5px;
-      margin-bottom: 20px;
       background: #3a3a3c;
       padding: 5px;
       border-radius: 10px;
-      margin-top: 10px; /* чтобы не конфликтовать с переключателем языка */
+      min-width: 0;
     }
     .tab {
       flex: 1;
@@ -95,10 +75,35 @@
       transition: 0.3s;
       color: #aaa;
       user-select: none;
+      white-space: nowrap;
     }
-
     .tab.active { background: var(--char-color); color: white; }
     .tab.active.weapon-tab { background: var(--weapon-color); }
+
+    /* language switch */
+    .lang-switch {
+      display: flex;
+      gap: 6px;
+      background: #3a3a3c;
+      padding: 5px;
+      border-radius: 10px;
+      flex: 0 0 auto;
+    }
+    .lang-btn {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: transparent;
+      color: #aaa;
+      font-weight: 800;
+      font-size: 0.85rem;
+      line-height: 1;
+    }
+    .lang-btn.active {
+      background: #4a4a4c;
+      color: #fff;
+    }
 
     h3 {
       margin-top: 0;
@@ -181,15 +186,17 @@
 
 <body>
   <div class="card">
-    <!-- Language switch -->
-    <div class="lang-switch">
-      <button id="langRu" class="lang-btn active" onclick="setLang('ru')">RU</button>
-      <button id="langEn" class="lang-btn" onclick="setLang('en')">EN</button>
-    </div>
 
-    <div class="tabs">
-      <div id="tabChar" class="tab active" onclick="switchTab('char')">Персонаж</div>
-      <div id="tabWeapon" class="tab" onclick="switchTab('weapon')">Оружие</div>
+    <div class="topbar">
+      <div class="tabs">
+        <div id="tabChar" class="tab active" onclick="switchTab('char')">Персонаж</div>
+        <div id="tabWeapon" class="tab" onclick="switchTab('weapon')">Оружие</div>
+      </div>
+
+      <div class="lang-switch">
+        <button id="langRu" class="lang-btn active" onclick="setLang('ru')">RU</button>
+        <button id="langEn" class="lang-btn" onclick="setLang('en')">EN</button>
+      </div>
     </div>
 
     <h3 id="mainTitle">Калькулятор Персонажа</h3>
@@ -272,8 +279,12 @@
         resultPlaceholder: "Результаты появятся здесь...",
         footerText: "Благодарность автору (In-game ID):",
 
-        // ВАЖНО: строки результатов НЕ переименовываем
-        // Поэтому их не трогаем при переключении языка.
+        resLuckyTitle: "● Супер удача (Выпадает на 20)",
+        resCharMixedTitle: "● Обычная (среднее 50/50)",
+        resWepMixedTitle: "● Обычная (шанс 50/50)",
+        resWorstTitle: "● Худший случай (по 140)",
+        resCards: "Карт",
+        resCrystals: "Кристаллов"
       },
       en: {
         tabChar: "Character",
@@ -294,11 +305,46 @@
         btnReset: "Reset",
 
         resultPlaceholder: "Results will appear here...",
-        footerText: "Thanks to the author (In-game ID):"
+        footerText: "Thanks to the author (In-game ID):",
+
+        resLuckyTitle: "● Super luck (drops at 20)",
+        resCharMixedTitle: "● Normal (avg 50/50)",
+        resWepMixedTitle: "● Normal (50/50 chance)",
+        resWorstTitle: "● Worst case (140 each)",
+        resCards: "Cards",
+        resCrystals: "Crystals"
       }
     };
 
-    function setLang(lang) {
+    function translateOptions() {
+      const langKey = currentLang === "en" ? "en" : "ru";
+
+      const stepSel = document.getElementById("currentStep");
+      if (stepSel) {
+        Array.from(stepSel.options).forEach(opt => {
+          const txt = opt.getAttribute(langKey === "en" ? "data-en" : "data-ru");
+          if (txt) opt.text = txt;
+        });
+      }
+
+      const cg = document.getElementById("charGuaranteed");
+      if (cg) {
+        Array.from(cg.options).forEach(opt => {
+          const txt = opt.getAttribute(langKey === "en" ? "data-en" : "data-ru");
+          if (txt) opt.text = txt;
+        });
+      }
+
+      const wg = document.getElementById("wepGuaranteed");
+      if (wg) {
+        Array.from(wg.options).forEach(opt => {
+          const txt = opt.getAttribute(langKey === "en" ? "data-en" : "data-ru");
+          if (txt) opt.text = txt;
+        });
+      }
+    }
+
+    function setLang(lang, persist = true) {
       currentLang = (lang === "en") ? "en" : "ru";
 
       document.getElementById("langRu").classList.toggle("active", currentLang === "ru");
@@ -323,52 +369,26 @@
 
       document.getElementById("footerText").innerText = t.footerText;
 
-      // Переводим option'ы (не меняя value)
       translateOptions();
 
-      // Заголовок зависит от текущей вкладки
+      // title depends on tab
       const title = document.getElementById("mainTitle");
       const isChar = currentMode === "char";
       title.innerText = isChar ? t.titleChar : t.titleWeapon;
 
-      // Плейсхолдер результата переводим только если там дефолтная строка
+      // placeholder: translate if it's currently placeholder
       const resEl = document.getElementById("result");
-      if (resEl && (
-        resEl.innerText.trim() === I18N.ru.resultPlaceholder ||
-        resEl.innerText.trim() === I18N.en.resultPlaceholder
-      )) {
+      const ruP = I18N.ru.resultPlaceholder;
+      const enP = I18N.en.resultPlaceholder;
+
+      if (resEl && (resEl.innerText.trim() === ruP || resEl.innerText.trim() === enP)) {
         resEl.innerText = t.resultPlaceholder;
-      }
-    }
-
-    function translateOptions() {
-      const langKey = currentLang === "en" ? "en" : "ru";
-
-      // currentStep options
-      const stepSel = document.getElementById("currentStep");
-      if (stepSel) {
-        Array.from(stepSel.options).forEach(opt => {
-          const txt = opt.getAttribute(langKey === "en" ? "data-en" : "data-ru");
-          if (txt) opt.text = txt;
-        });
+      } else {
+        calculate(); // re-render results with new language labels
       }
 
-      // charGuaranteed options
-      const cg = document.getElementById("charGuaranteed");
-      if (cg) {
-        Array.from(cg.options).forEach(opt => {
-          const txt = opt.getAttribute(langKey === "en" ? "data-en" : "data-ru");
-          if (txt) opt.text = txt;
-        });
-      }
-
-      // wepGuaranteed options
-      const wg = document.getElementById("wepGuaranteed");
-      if (wg) {
-        Array.from(wg.options).forEach(opt => {
-          const txt = opt.getAttribute(langKey === "en" ? "data-en" : "data-ru");
-          if (txt) opt.text = txt;
-        });
+      if (persist) {
+        try { localStorage.setItem("dmc_lang", currentLang); } catch(e){}
       }
     }
 
@@ -416,7 +436,7 @@
       const firstLegendSteps = Math.ceil(firstLegendPulls / pullsPerStep);
 
       function simulateByTotalCycles(totalCycles) {
-        if (totalCycles <= 0) return { cards: 0, crystals: 0, steps: 0, cycles: 0 };
+        if (totalCycles <= 0) return { cards: 0, crystals: 0 };
 
         const totalSteps = firstLegendSteps + (totalCycles - 1) * cycleSteps;
 
@@ -430,9 +450,7 @@
 
         return {
           cards: totalCards,
-          crystals: totalCards * crystalRate,
-          steps: totalSteps,
-          cycles: totalCycles
+          crystals: totalCards * crystalRate
         };
       }
 
@@ -471,15 +489,13 @@
       const firstLegendPulls = Math.max(0, currentPity - 20);
 
       function simulateByTotalCycles(totalCycles) {
-        if (totalCycles <= 0) return { cards: 0, crystals: 0, pulls: 0, cycles: 0 };
+        if (totalCycles <= 0) return { cards: 0, crystals: 0 };
 
         const totalPulls = firstLegendPulls + (totalCycles - 1) * cyclePulls;
 
         return {
           cards: totalPulls,
-          pulls: totalPulls,
-          crystals: totalPulls * crystalRate,
-          cycles: totalCycles
+          crystals: totalPulls * crystalRate
         };
       }
 
@@ -500,6 +516,7 @@
 
     function calculate() {
       let out = "";
+      const t = I18N[currentLang];
 
       if (currentMode === "char") {
         const count = parseInt(document.getElementById("levels").value) || 0;
@@ -509,15 +526,14 @@
 
         const res = calculateCharacter(count, startStep, currentPity, startGuar);
 
-        /* строки результатов НЕ меняем (как просил) */
-        out += `<span class="mode-title" style="color:var(--char-color)">● Супер удача (Выпадает на 20)</span>`;
-        out += `Карт: <b>${res.lucky.cards}</b> | Кристаллов: <b>${res.lucky.crystals.toLocaleString()}</b><br>`;
+        out += `<span class="mode-title" style="color:var(--char-color)">${t.resLuckyTitle}</span>`;
+        out += `${t.resCards}: <b>${res.lucky.cards}</b> | ${t.resCrystals}: <b>${res.lucky.crystals.toLocaleString()}</b><br>`;
 
-        out += `<span class="mode-title" style="color:var(--char-color)">● Обычная (среднее 50/50)</span>`;
-        out += `Карт: <b>${res.mixed.cards}</b> | Кристаллов: <b>${res.mixed.crystals.toLocaleString()}</b><br>`;
+        out += `<span class="mode-title" style="color:var(--char-color)">${t.resCharMixedTitle}</span>`;
+        out += `${t.resCards}: <b>${res.mixed.cards}</b> | ${t.resCrystals}: <b>${res.mixed.crystals.toLocaleString()}</b><br>`;
 
-        out += `<span class="mode-title" style="color:var(--char-color)">● Худший случай (по 140)</span>`;
-        out += `Карт: <b>${res.worst.cards}</b> | Кристаллов: <b>${res.worst.crystals.toLocaleString()}</b><br>`;
+        out += `<span class="mode-title" style="color:var(--char-color)">${t.resWorstTitle}</span>`;
+        out += `${t.resCards}: <b>${res.worst.cards}</b> | ${t.resCrystals}: <b>${res.worst.crystals.toLocaleString()}</b><br>`;
 
       } else {
         const count = parseInt(document.getElementById("wepCount").value) || 0;
@@ -526,15 +542,14 @@
 
         const res = calculateWeapon(count, currentPity, startG);
 
-        /* строки результатов НЕ меняем (как просил) */
-        out += `<span class="mode-title" style="color:var(--weapon-color)">● Супер удача (Выпадает на 20)</span>`;
-        out += `Карт: <b>${res.lucky.cards}</b> | Кристаллов: <b>${res.lucky.crystals.toLocaleString()}</b><br>`;
+        out += `<span class="mode-title" style="color:var(--weapon-color)">${t.resLuckyTitle}</span>`;
+        out += `${t.resCards}: <b>${res.lucky.cards}</b> | ${t.resCrystals}: <b>${res.lucky.crystals.toLocaleString()}</b><br>`;
 
-        out += `<span class="mode-title" style="color:var(--weapon-color)">● Обычная (шанс 50/50)</span>`;
-        out += `Карт: <b>${res.mixed.cards}</b> | Кристаллов: <b>${res.mixed.crystals.toLocaleString()}</b><br>`;
+        out += `<span class="mode-title" style="color:var(--weapon-color)">${t.resWepMixedTitle}</span>`;
+        out += `${t.resCards}: <b>${res.mixed.cards}</b> | ${t.resCrystals}: <b>${res.mixed.crystals.toLocaleString()}</b><br>`;
 
-        out += `<span class="mode-title" style="color:var(--weapon-color)">● Худший случай (по 140)</span>`;
-        out += `Карт: <b>${res.worst.cards}</b> | Кристаллов: <b>${res.worst.crystals.toLocaleString()}</b><br>`;
+        out += `<span class="mode-title" style="color:var(--weapon-color)">${t.resWorstTitle}</span>`;
+        out += `${t.resCards}: <b>${res.worst.cards}</b> | ${t.resCrystals}: <b>${res.worst.crystals.toLocaleString()}</b><br>`;
       }
 
       document.getElementById("result").innerHTML = out;
@@ -559,7 +574,22 @@
 
     // init
     switchTab(currentMode);
-    setLang("ru");
+
+    // ✅ Автовыбор языка:
+    // 1) если есть сохраненный язык -> он
+    // 2) иначе по браузеру: ru* -> RU, иначе EN
+    (function initLanguage(){
+      let saved = null;
+      try { saved = localStorage.getItem("dmc_lang"); } catch(e){}
+      if (saved === "ru" || saved === "en") {
+        setLang(saved, false);
+        return;
+      }
+
+      const nav = (navigator.language || navigator.userLanguage || "en").toLowerCase();
+      const auto = nav.startsWith("ru") ? "ru" : "en";
+      setLang(auto, true);
+    })();
   </script>
 </body>
 </html>
