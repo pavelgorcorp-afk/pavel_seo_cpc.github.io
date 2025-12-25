@@ -5,29 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DMC: POC Banner Calc 2025</title>
 
+  <!-- Yandex.Metrika counter -->
+  <script type="text/javascript">
+      (function(m,e,t,r,i,k,a){
+          m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+          m[i].l=1*new Date();
+          for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+          k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+      })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=105999900', 'ym');
 
-<!-- Yandex.Metrika counter -->
-<script type="text/javascript">
-    (function(m,e,t,r,i,k,a){
-        m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-        m[i].l=1*new Date();
-        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-    })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=105999900', 'ym');
-
-    ym(105999900, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
-</script>
-<noscript><div><img src="https://mc.yandex.ru/watch/105999900" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-<!-- /Yandex.Metrika counter -->
-
-
-
+      ym(105999900, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
+  </script>
+  <noscript><div><img src="https://mc.yandex.ru/watch/105999900" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+  <!-- /Yandex.Metrika counter -->
 
   <style>
     :root {
-      /* ✅ Цвета по твоему запросу */
-      --char-color: #3d85c6;   /* синий = Персонаж */
-      --weapon-color: #c0392b; /* красный = Оружие */
+      --char-color: #3d85c6;
+      --weapon-color: #c0392b;
 
       --bg: #1c1c1e;
       --card-bg: #2c2c2e;
@@ -72,9 +67,7 @@
       user-select: none;
     }
 
-    /* ✅ Активная вкладка по умолчанию = персонаж (синий) */
     .tab.active { background: var(--char-color); color: white; }
-    /* ✅ Активная вкладка оружия (красный) */
     .tab.active.weapon-tab { background: var(--weapon-color); }
 
     h3 {
@@ -279,7 +272,9 @@
 
       const luckyLeg = count;
       const mixedLeg = startGuaranteed ? (2 * count - 1) : (2 * count);
-      const worstLeg = 2 * count;
+
+      // ✅ FIX #1: Худший случай учитывает стартовый 100% гарант
+      const worstLeg = startGuaranteed ? (2 * count - 1) : (2 * count);
 
       return {
         lucky: simulateByTotalLegendaries(luckyLeg),
@@ -315,8 +310,14 @@
       }
 
       const luckyLeg = count;
-      const mixedLeg = startGuaranteed ? (2 * count - 1) : (2 * count);
-      const worstLeg = 2 * count;
+
+      // ✅ FIX #2: "Обычная" теперь не равна "Худшему" (мат. ожидание 50/50)
+      // - без гаранта: 1.5 леги на копию
+      // - с гарантом: 1 лега на 1-ю копию, дальше по 1.5 => 1.5*count - 0.5
+      const mixedLeg = startGuaranteed ? (1.5 * count - 0.5) : (1.5 * count);
+
+      // Худший случай также учитывает стартовый гарант
+      const worstLeg = startGuaranteed ? (2 * count - 1) : (2 * count);
 
       return {
         lucky: simulateByTotalLegendaries(luckyLeg),
@@ -365,7 +366,6 @@
       document.getElementById("result").innerHTML = out;
     }
 
-    // ✅ СБРОС: очищает значения и результат, НО ОСТАВЛЯЕТ текущую вкладку
     function resetPage() {
       if (currentMode === "char") {
         document.getElementById("levels").value = 1;
@@ -379,14 +379,10 @@
       }
 
       document.getElementById("result").innerHTML = "Результаты появятся здесь...";
-
-      // обновим заголовок/цвет кнопки, но вкладку НЕ меняем
       switchTab(currentMode);
     }
 
-    // на всякий случай фиксируем корректные цвета при первом открытии
     switchTab(currentMode);
   </script>
 </body>
 </html>
-
