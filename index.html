@@ -46,7 +46,36 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
       width: 100%;
       max-width: 400px;
+      position: relative;
     }
+
+    /* Language switch */
+    .lang-switch {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      gap: 6px;
+      background: #3a3a3c;
+      padding: 5px;
+      border-radius: 10px;
+    }
+    .lang-btn {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      background: transparent;
+      color: #aaa;
+      font-weight: 700;
+      font-size: 0.85rem;
+      line-height: 1;
+    }
+    .lang-btn.active {
+      background: #4a4a4c;
+      color: #fff;
+    }
+
     .tabs {
       display: flex;
       gap: 5px;
@@ -54,6 +83,7 @@
       background: #3a3a3c;
       padding: 5px;
       border-radius: 10px;
+      margin-top: 10px; /* чтобы не конфликтовать с переключателем языка */
     }
     .tab {
       flex: 1;
@@ -151,6 +181,12 @@
 
 <body>
   <div class="card">
+    <!-- Language switch -->
+    <div class="lang-switch">
+      <button id="langRu" class="lang-btn active" onclick="setLang('ru')">RU</button>
+      <button id="langEn" class="lang-btn" onclick="setLang('en')">EN</button>
+    </div>
+
     <div class="tabs">
       <div id="tabChar" class="tab active" onclick="switchTab('char')">Персонаж</div>
       <div id="tabWeapon" class="tab" onclick="switchTab('weapon')">Оружие</div>
@@ -160,58 +196,181 @@
 
     <!-- ПЕРСОНАЖ -->
     <div id="charFields">
-      <label>Нужно уровней (копий):</label>
+      <label id="lblLevels">Нужно уровней (копий):</label>
       <input type="number" id="levels" value="1" min="1" />
 
-      <label>Текущий шаг цикла (1-5):</label>
+      <label id="lblStep">Текущий шаг цикла (1-5):</label>
       <select id="currentStep">
-        <option value="0">1 (За 10)</option>
-        <option value="1">2 (За 5)</option>
-        <option value="2">3 (За 10)</option>
-        <option value="3">4 (За 10)</option>
-        <option value="4">5 (БЕСПЛАТНЫЙ)</option>
+        <option value="0" data-ru="1 (За 10)" data-en="1 (Cost 10)">1 (За 10)</option>
+        <option value="1" data-ru="2 (За 5)" data-en="2 (Cost 5)">2 (За 5)</option>
+        <option value="2" data-ru="3 (За 10)" data-en="3 (Cost 10)">3 (За 10)</option>
+        <option value="3" data-ru="4 (За 10)" data-en="4 (Cost 10)">4 (За 10)</option>
+        <option value="4" data-ru="5 (БЕСПЛАТНЫЙ)" data-en="5 (FREE)">5 (БЕСПЛАТНЫЙ)</option>
       </select>
 
-      <label>Счетчик гаранта (сейчас):</label>
+      <label id="lblCharPity">Счетчик гаранта (сейчас):</label>
       <input type="number" id="charPity" value="90" min="20" max="90" />
 
-      <label>Есть 100% гарант на персонажа?</label>
+      <label id="lblCharG">Есть 100% гарант на персонажа?</label>
       <select id="charGuaranteed">
-        <option value="no">Нет (50/50)</option>
-        <option value="yes">Да (100%)</option>
+        <option value="no" data-ru="Нет (50/50)" data-en="No (50/50)">Нет (50/50)</option>
+        <option value="yes" data-ru="Да (100%)" data-en="Yes (100%)">Да (100%)</option>
       </select>
     </div>
 
     <!-- ОРУЖИЕ -->
     <div id="weaponFields" style="display:none;">
-      <label>Нужно копий оружия:</label>
+      <label id="lblWepCount">Нужно копий оружия:</label>
       <input type="number" id="wepCount" value="1" min="1" />
 
-      <label>Счетчик гаранта (сейчас):</label>
+      <label id="lblWepPity">Счетчик гаранта (сейчас):</label>
       <input type="number" id="wepPity" value="90" min="20" max="90" />
 
-      <label>Есть 100% гарант на оружие?</label>
+      <label id="lblWepG">Есть 100% гарант на оружие?</label>
       <select id="wepGuaranteed">
-        <option value="no">Нет (50/50)</option>
-        <option value="yes">Да (100%)</option>
+        <option value="no" data-ru="Нет (50/50)" data-en="No (50/50)">Нет (50/50)</option>
+        <option value="yes" data-ru="Да (100%)" data-en="Yes (100%)">Да (100%)</option>
       </select>
     </div>
 
     <div class="btn-group">
       <button id="calcBtn" class="btn-calc" onclick="calculate()">Рассчитать</button>
-      <button class="btn-reset" onclick="resetPage()">Сброс</button>
+      <button id="resetBtn" class="btn-reset" onclick="resetPage()">Сброс</button>
     </div>
 
     <div id="result" class="res">Результаты появятся здесь...</div>
 
     <div class="footer">
-      Благодарность автору (In-game ID):<br />
+      <span id="footerText">Благодарность автору (In-game ID):</span><br />
       <div class="donate-id">115290070957</div>
     </div>
   </div>
 
   <script>
     let currentMode = "char";
+    let currentLang = "ru";
+
+    const I18N = {
+      ru: {
+        tabChar: "Персонаж",
+        tabWeapon: "Оружие",
+        titleChar: "Калькулятор Персонажа",
+        titleWeapon: "Калькулятор Оружия",
+
+        lblLevels: "Нужно уровней (копий):",
+        lblStep: "Текущий шаг цикла (1-5):",
+        lblCharPity: "Счетчик гаранта (сейчас):",
+        lblCharG: "Есть 100% гарант на персонажа?",
+
+        lblWepCount: "Нужно копий оружия:",
+        lblWepPity: "Счетчик гаранта (сейчас):",
+        lblWepG: "Есть 100% гарант на оружие?",
+
+        btnCalc: "Рассчитать",
+        btnReset: "Сброс",
+
+        resultPlaceholder: "Результаты появятся здесь...",
+        footerText: "Благодарность автору (In-game ID):",
+
+        // ВАЖНО: строки результатов НЕ переименовываем
+        // Поэтому их не трогаем при переключении языка.
+      },
+      en: {
+        tabChar: "Character",
+        tabWeapon: "Weapon",
+        titleChar: "Character Calculator",
+        titleWeapon: "Weapon Calculator",
+
+        lblLevels: "Copies needed:",
+        lblStep: "Current cycle step (1-5):",
+        lblCharPity: "Pity counter (now):",
+        lblCharG: "Do you have 100% guarantee for character?",
+
+        lblWepCount: "Weapon copies needed:",
+        lblWepPity: "Pity counter (now):",
+        lblWepG: "Do you have 100% guarantee for weapon?",
+
+        btnCalc: "Calculate",
+        btnReset: "Reset",
+
+        resultPlaceholder: "Results will appear here...",
+        footerText: "Thanks to the author (In-game ID):"
+      }
+    };
+
+    function setLang(lang) {
+      currentLang = (lang === "en") ? "en" : "ru";
+
+      document.getElementById("langRu").classList.toggle("active", currentLang === "ru");
+      document.getElementById("langEn").classList.toggle("active", currentLang === "en");
+
+      const t = I18N[currentLang];
+
+      document.getElementById("tabChar").innerText = t.tabChar;
+      document.getElementById("tabWeapon").innerText = t.tabWeapon;
+
+      document.getElementById("lblLevels").innerText = t.lblLevels;
+      document.getElementById("lblStep").innerText = t.lblStep;
+      document.getElementById("lblCharPity").innerText = t.lblCharPity;
+      document.getElementById("lblCharG").innerText = t.lblCharG;
+
+      document.getElementById("lblWepCount").innerText = t.lblWepCount;
+      document.getElementById("lblWepPity").innerText = t.lblWepPity;
+      document.getElementById("lblWepG").innerText = t.lblWepG;
+
+      document.getElementById("calcBtn").innerText = t.btnCalc;
+      document.getElementById("resetBtn").innerText = t.btnReset;
+
+      document.getElementById("footerText").innerText = t.footerText;
+
+      // Переводим option'ы (не меняя value)
+      translateOptions();
+
+      // Заголовок зависит от текущей вкладки
+      const title = document.getElementById("mainTitle");
+      const isChar = currentMode === "char";
+      title.innerText = isChar ? t.titleChar : t.titleWeapon;
+
+      // Плейсхолдер результата переводим только если там дефолтная строка
+      const resEl = document.getElementById("result");
+      if (resEl && (
+        resEl.innerText.trim() === I18N.ru.resultPlaceholder ||
+        resEl.innerText.trim() === I18N.en.resultPlaceholder
+      )) {
+        resEl.innerText = t.resultPlaceholder;
+      }
+    }
+
+    function translateOptions() {
+      const langKey = currentLang === "en" ? "en" : "ru";
+
+      // currentStep options
+      const stepSel = document.getElementById("currentStep");
+      if (stepSel) {
+        Array.from(stepSel.options).forEach(opt => {
+          const txt = opt.getAttribute(langKey === "en" ? "data-en" : "data-ru");
+          if (txt) opt.text = txt;
+        });
+      }
+
+      // charGuaranteed options
+      const cg = document.getElementById("charGuaranteed");
+      if (cg) {
+        Array.from(cg.options).forEach(opt => {
+          const txt = opt.getAttribute(langKey === "en" ? "data-en" : "data-ru");
+          if (txt) opt.text = txt;
+        });
+      }
+
+      // wepGuaranteed options
+      const wg = document.getElementById("wepGuaranteed");
+      if (wg) {
+        Array.from(wg.options).forEach(opt => {
+          const txt = opt.getAttribute(langKey === "en" ? "data-en" : "data-ru");
+          if (txt) opt.text = txt;
+        });
+      }
+    }
 
     function switchTab(mode) {
       currentMode = mode;
@@ -225,7 +384,8 @@
       document.getElementById("weaponFields").style.display = isChar ? "none" : "block";
 
       const title = document.getElementById("mainTitle");
-      title.innerText = isChar ? "Калькулятор Персонажа" : "Калькулятор Оружия";
+      const t = I18N[currentLang];
+      title.innerText = isChar ? t.titleChar : t.titleWeapon;
       title.className = isChar ? "" : "weapon-title";
 
       document.getElementById("calcBtn").style.background = isChar ? "var(--char-color)" : "var(--weapon-color)";
@@ -276,15 +436,12 @@
         };
       }
 
-      // ✅ Супер удача: 0 проигрышей -> циклов = count
       const luckyCycles = count;
 
-      // ✅ Обычная: проигрышей ~ половина 50/50 попыток
       const attempts = startGuaranteed ? Math.max(0, count - 1) : count;
       const lossesAvg = Math.floor(attempts / 2);
       const mixedCycles = count + lossesAvg;
 
-      // ✅ Худший: проигрыш на каждой 50/50 попытке
       const worstCycles = startGuaranteed ? (2 * count - 1) : (2 * count);
 
       return {
@@ -326,15 +483,12 @@
         };
       }
 
-      // ✅ Супер удача: циклов = count
       const luckyCycles = count;
 
-      // ✅ Обычная: проигрышей ~ половина 50/50 попыток
       const attempts = startGuaranteed ? Math.max(0, count - 1) : count;
       const lossesAvg = Math.floor(attempts / 2);
       const mixedCycles = count + lossesAvg;
 
-      // ✅ Худший: проигрыш на каждой 50/50 попытке
       const worstCycles = startGuaranteed ? (2 * count - 1) : (2 * count);
 
       return {
@@ -355,7 +509,8 @@
 
         const res = calculateCharacter(count, startStep, currentPity, startGuar);
 
-        out += `<span class="mode-title" style="color:var(--char-color)">● Супер удача (всегда на 70)</span>`;
+        /* строки результатов НЕ меняем (как просил) */
+        out += `<span class="mode-title" style="color:var(--char-color)">● Супер удача (Выпадает на 20)</span>`;
         out += `Карт: <b>${res.lucky.cards}</b> | Кристаллов: <b>${res.lucky.crystals.toLocaleString()}</b><br>`;
 
         out += `<span class="mode-title" style="color:var(--char-color)">● Обычная (среднее 50/50)</span>`;
@@ -371,7 +526,8 @@
 
         const res = calculateWeapon(count, currentPity, startG);
 
-        out += `<span class="mode-title" style="color:var(--weapon-color)">● Супер удача (70 на копию)</span>`;
+        /* строки результатов НЕ меняем (как просил) */
+        out += `<span class="mode-title" style="color:var(--weapon-color)">● Супер удача (Выпадает на 20)</span>`;
         out += `Карт: <b>${res.lucky.cards}</b> | Кристаллов: <b>${res.lucky.crystals.toLocaleString()}</b><br>`;
 
         out += `<span class="mode-title" style="color:var(--weapon-color)">● Обычная (шанс 50/50)</span>`;
@@ -396,11 +552,14 @@
         document.getElementById("wepGuaranteed").value = "no";
       }
 
-      document.getElementById("result").innerHTML = "Результаты появятся здесь...";
+      const t = I18N[currentLang];
+      document.getElementById("result").innerHTML = t.resultPlaceholder;
       switchTab(currentMode);
     }
 
+    // init
     switchTab(currentMode);
+    setLang("ru");
   </script>
 </body>
 </html>
